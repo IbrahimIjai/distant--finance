@@ -3,7 +3,7 @@ import React from "react";
 
 export default function LoansPage() {
 	return (
-		<div className="max-w-7xl pt-24">
+		<div className="max-w-7xl pt-24 mx-auto border border-green-600">
 			<Loans />
 		</div>
 	);
