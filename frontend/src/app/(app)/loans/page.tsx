@@ -1,9 +1,10 @@
-import React from 'react'
+import Loans from "@/ui/loans/loans";
+import React from "react";
 
-export default function Loans() {
-  return (
-    <div>
-      Loans
-    </div>
-  )
+export default function LoansPage() {
+	return (
+		<div className="max-w-7xl pt-24">
+			<Loans />
+		</div>
+	);
 }
