@@ -34,6 +34,10 @@ const NavLinks: links[] = [
 		title: "Loans",
 		route: "/loans",
 	},
+	{
+		title: "Quick Swap",
+		route: "/swap",
+	},
 ];
 
 export default function Header() {
