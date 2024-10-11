@@ -1,10 +1,11 @@
 import { Abi, Address } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { useToast } from "../use-toast";
-import { useEffect } from "react";
+import { ToasterToast, useToast } from "../use-toast";
+import { useEffect, useRef } from "react";
 
 export type TrxTitle =
-	| "Creating Approval for all Tokens in the selected collection" | "...";
+	| "Creating Approval for all Tokens in the selected collection"
+	| "...";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,
@@ -20,6 +21,12 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	contractAddress: Address;
 }) => {
 	const { toast } = useToast();
+	
+	const toastRef = useRef<{
+		id: string;
+		dismiss: () => void;
+		update: (props: ToasterToast) => void;
+	} | null>(null);
 
 	const {
 		data: hash,
@@ -52,23 +59,56 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 			args,
 		});
 
+	const showToast = (
+		title: string,
+		description: string,
+		variant: "default" | "destructive" = "default",
+	) => {
+		if (toastRef.current) {
+			toastRef.current.dismiss();
+		}
+		toastRef.current = toast({
+			title,
+			description,
+			variant,
+			duration: 3000,
+		});
+	};
+
 	useEffect(() => {
 		if (isPending) {
-			toast({
-				title: `${trxTitle}...`,
-				description: `Transaction Pending, Please confirm in wallet`,
-				variant: "default",
-				duration: 3000,
-			});
+			showToast(
+				`${trxTitle}...`,
+				"Transaction Pending, Please confirm in wallet",
+			);
+		} else if (isTrxSubmitted) {
+			showToast(
+				`${trxTitle}...`,
+				"Transaction has been submitted to the network",
+			);
+		} else if (isConfirming) {
+			showToast(`${trxTitle}...`, "Waiting for transaction confirmation");
+		} else if (isConfirmed) {
+			showToast(`${trxTitle}`, "Transaction confirmed successfully", "default");
+		} else if (isWriteContractError || isWaitTrxError) {
+			showToast(
+				"Transaction Failed",
+				WriteContractError?.message ||
+					WaitForTransactionReceiptError?.message ||
+					"An error occurred",
+				"destructive",
+			);
 		}
-		if (isTrxSubmitted) {
-			toast({
-				title: `${trxTitle}...`,
-				description: "Transaction has been submitted to the network",
-				variant: "default",
-				duration: 2000,
-			});
-		}
+
+		// Clean up function to dismiss the toast after 3 seconds if no state change
+		const timer = setTimeout(() => {
+			if (toastRef.current) {
+				toastRef.current.dismiss();
+				toastRef.current = null;
+			}
+		}, 3000);
+
+		return () => clearTimeout(timer);
 	}, [
 		isPending,
 		isTrxSubmitted,

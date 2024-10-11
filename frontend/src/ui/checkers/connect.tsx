@@ -5,6 +5,7 @@ import { useAccount } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
 import { useIsMounted } from "@/hooks/useIsMounted";
 import { Button, ButtonProps } from "@/components/ui/button";
+
 const Connect: FC<ButtonProps> = ({ children, ...props }) => {
 	const isMounted = useIsMounted();
 	const { open } = useAppKit();

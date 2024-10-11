@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export type Metadata = {
 	name: string;
 	image: string;
@@ -35,6 +37,7 @@ export interface ERC721 {
 
 export interface ProcessedNFTData {
 	[collectionName: string]: {
+		collectionAddress: Address;
 		nftsCount: number;
 		nfts: ERC721[];
 	};

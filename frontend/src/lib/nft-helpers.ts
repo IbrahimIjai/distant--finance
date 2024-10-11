@@ -1,3 +1,4 @@
+import { Address } from "viem";
 import { ERC721, RaribleNft, ProcessedNFTData } from "./types";
 
 export const extractNFTData = (nft: RaribleNft): ERC721 => ({
@@ -19,10 +20,14 @@ export const extractNFTData = (nft: RaribleNft): ERC721 => ({
 export const processNFTData = (rawData: RaribleNft[]): ProcessedNFTData => {
 	return rawData.reduce((acc: ProcessedNFTData, nft: RaribleNft) => {
 		const processedNFT = extractNFTData(nft);
-		const { collectionName } = processedNFT;
-
+		const { collectionName, collectionAddress } = processedNFT;
+		
 		if (!acc[collectionName]) {
-			acc[collectionName] = { nftsCount: 0, nfts: [] };
+			acc[collectionName] = {
+				nftsCount: 0,
+				collectionAddress: collectionAddress as Address,
+				nfts: [],
+			};
 		}
 
 		acc[collectionName].nftsCount += 1;
@@ -60,3 +65,9 @@ export const getNFTsInCollection = (
 
 // const obj = { a: 1, b: 2, c: 3 };
 // console.log(Object.entries(obj)); // Output: [['a', 1], ['b', 2], ['c', 3]]
+
+
+export function extractAddress(fullAddress: string): string {
+	const parts = fullAddress.split(":");
+	return parts[parts.length - 1];
+}

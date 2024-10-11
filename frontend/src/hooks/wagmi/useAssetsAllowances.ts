@@ -38,15 +38,12 @@ export default function GetBalanceAllowance(
 	return { balance, allowance };
 }
 
-export function useERC721Approval(
-	collection: Address,
-	account: Address,
-) {
+export function useERC721Approval(collection: Address, account: Address) {
+	console.log({ accccoint: account });
 	return useReadContract({
 		address: collection,
 		abi: erc721Abi,
 		functionName: "isApprovedForAll",
 		args: [account, TOKENLOCKER],
 	});
-	// return isApproved;
 }

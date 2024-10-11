@@ -17,12 +17,12 @@ import { RaribleNft } from "@/lib/types";
 
 export function LoanRequest() {
 	const { address } = useAccount();
-	const { data, isLoading, isError, error } = useERCZ21Balance(address);
+	const { data } = useERCZ21Balance(address);
 	const processedData = useMemo(() => {
 		if (!data) return {};
 		return processNFTData(data as RaribleNft[]);
 	}, [data]);
-	console.log({ processedData, isLoading, isError, error });
+	// console.log({ processedData, isLoading, isError, error });
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
