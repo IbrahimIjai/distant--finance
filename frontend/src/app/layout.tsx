@@ -6,6 +6,8 @@ import { headers } from "next/headers";
 import "@coinbase/onchainkit/styles.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/toaster";
+
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
 	variable: "--font-geist-sans",
@@ -36,7 +38,8 @@ export default function RootLayout({
 				<RootProvider cookies={cookies}>
 					<Header />
 					{children}
-					<Footer/>
+					<Footer />
+					<Toaster />
 				</RootProvider>
 			</body>
 		</html>

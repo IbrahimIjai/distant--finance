@@ -33,6 +33,13 @@ export interface ERC721 {
 	metaData: nftMeta;
 }
 
+export interface ProcessedNFTData {
+	[collectionName: string]: {
+		nftsCount: number;
+		nfts: ERC721[];
+	};
+}
+
 export interface RaribleNft {
 	id: string;
 	blockchain: string;

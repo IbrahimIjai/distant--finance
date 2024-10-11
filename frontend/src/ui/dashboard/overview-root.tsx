@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BalancePanel from "./balance-panel";
-import { useERCZ21Balance } from "@/hooks/useERC721Balance";
+import { useERCZ21Balance } from "@/hooks/wagmi/useERC721Balance";
 import { useAccount } from "wagmi";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,7 +47,6 @@ const NFTRow: React.FC<NFTRowProps> = ({ nft }) => {
 				</div>
 			</div>
 			<div></div>
-			{/* <Badge variant="secondary">{}</Badge> */}
 		</div>
 	);
 };
@@ -98,7 +97,7 @@ const NFTList: React.FC<NFTListProps> = ({
 export default function Overview() {
 	const { address } = useAccount();
 	const { data, isLoading, isError, error } = useERCZ21Balance(address);
-	console.log({ address, data, isError, error, isLoading });
+	// console.log({ address, data, isError, error, isLoading });
 
 	// console.log({ grabbingNft: data[1].meta });
 

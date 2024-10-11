@@ -1,4 +1,4 @@
-import { ERC721, RaribleNft } from "./types";
+import { ERC721, RaribleNft, ProcessedNFTData } from "./types";
 
 export const extractNFTData = (nft: RaribleNft): ERC721 => ({
 	tokenId: nft.tokenId,
@@ -14,6 +14,43 @@ export const extractNFTData = (nft: RaribleNft): ERC721 => ({
 		// nft.meta.content.length > 0 ? nft.meta.content[0].mimeType :
 	},
 });
+
+// Function to process raw NFT data
+export const processNFTData = (rawData: RaribleNft[]): ProcessedNFTData => {
+	return rawData.reduce((acc: ProcessedNFTData, nft: RaribleNft) => {
+		const processedNFT = extractNFTData(nft);
+		const { collectionName } = processedNFT;
+
+		if (!acc[collectionName]) {
+			acc[collectionName] = { nftsCount: 0, nfts: [] };
+		}
+
+		acc[collectionName].nftsCount += 1;
+		acc[collectionName].nfts.push(processedNFT);
+
+		return acc;
+	}, {});
+};
+
+// Function to get list of collections a user owns, with the number of tokens
+export const getUserCollections = (
+	processedData: ProcessedNFTData,
+): Array<{ collectionName: string; nftsCount: number }> => {
+	return Object.entries(processedData).map(
+		([collectionName, { nftsCount }]) => ({
+			collectionName,
+			nftsCount,
+		}),
+	);
+};
+
+// Function to get list of NFTs a user owns in a specific collection
+export const getNFTsInCollection = (
+	processedData: ProcessedNFTData,
+	collectionName: string,
+): ERC721[] => {
+	return processedData[collectionName]?.nfts || [];
+};
 // Object keys, values, and entries methods
 // const obj = { a: 1, b: 2, c: 3 };
 // console.log(Object.keys(obj)); // Output: ['a', 'b', 'c']
