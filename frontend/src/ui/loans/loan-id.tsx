@@ -17,6 +17,7 @@ interface LoanType {
 	lender: AccountType;
 	borrower: AccountType;
 	lockId: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		tokens: any[]; // Replace with actual token type if available
 	};
 	// Add other necessary loan properties
@@ -46,6 +47,7 @@ class Loan {
 	status: LoanStatus;
 	lender: AccountType;
 	borrower: AccountType;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	lockId: { tokens: any[] };
 
 	constructor(data: LoanType) {
@@ -93,8 +95,10 @@ const TransactionsTable: React.FC<{ height: number }> = () => (
 	</div>
 );
 
-const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
+const LoanIdComponent: React.FC<{ id: string }> = () => {
 	const AnalyticsHeightRef = useRef<HTMLDivElement>(null);
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [modal, setModal] = useState<ModalType>(ModalType.INACTIVE);
 	const [refresh, setRefresh] = useState<boolean>(false);
 

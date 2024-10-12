@@ -51,7 +51,7 @@ export interface RaribleNft {
 	tokenId: string;
 	creators: { account: string; value: number }[];
 	lazySupply: string;
-	pending: any[]; // Could be an array of different types, keep it as any for now
+	pending: boolean[] | string[]; // Could be an array of different types, keep it as any for now
 	mintedAt: string;
 	lastUpdatedAt: string;
 	supply: string;
@@ -62,7 +62,7 @@ export interface RaribleNft {
 		genres: string[];
 		externalUri: string;
 		originalMetaUri: string;
-		attributes: any[]; // Could be an array of different types, keep it as any for now
+		attributes: string[]; // Could be an array of different types, keep it as any for now
 		content: {
 			"@type": string;
 			url: string;
@@ -73,12 +73,12 @@ export interface RaribleNft {
 			width?: number; // Optional property
 			height?: number; // Optional property
 		}[];
-		extraContent: any[]; // Could be an array of different types, keep it as any for now
+		extraContent: string[]; // Could be an array of different types, keep it as any for now
 	};
 	deleted: boolean;
-	originOrders: any[]; // Could be an array of different types, keep it as any for now
+	originOrders: string[]; // Could be an array of different types, keep it as any for now
 	ammOrders: { ids: string[] };
-	auctions: any[]; // Could be an array of different types, keep it as any for now
+	auctions: string[]; // Could be an array of different types, keep it as any for now
 	totalStock: string;
 	sellers: number;
 	lastSale: {

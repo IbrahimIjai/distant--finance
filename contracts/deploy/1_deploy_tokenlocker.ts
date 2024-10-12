@@ -14,7 +14,7 @@ HardhatRuntimeEnvironment) {
   const distantFinance = await ethers.getContract("DistantFinance", deployer);
 
   //checks
-  console.log("verify protocol contracts",distantFinance.address);
+  console.log("verify protocol contracts", distantFinance.address);
 
   await deploy("TokenLockerContract", {
     from: deployer,

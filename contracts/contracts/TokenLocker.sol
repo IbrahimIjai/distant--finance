@@ -171,6 +171,7 @@ contract TokenLockerContract is ERC721Holder, Context, ReentrancyGuard {
 	function updateProtocol(address _Protocol) external isAdmin {
 		Protocol = IProtocol(_Protocol);
 	}
+
 	function updateAdmin(address _newAdmin) external isAdmin {
 		admin = _newAdmin;
 	}
@@ -187,9 +188,18 @@ contract TokenLockerContract is ERC721Holder, Context, ReentrancyGuard {
 			}
 		}
 	}
+
 	function getLockedTokensData(
 		bytes32 _id
 	) external view returns (LockedTokens memory lockTokens) {
 		lockTokens = lockedTokens[_id];
+	}
+
+	function recueWithdraw(
+		uint tokenId,
+		address collectionAddress
+	) external nonReentrant {
+		IERC721 nft = IERC721(collectionAddress);
+		nft.safeTransferFrom(address(this), _msgSender(), tokenId);
 	}
 }

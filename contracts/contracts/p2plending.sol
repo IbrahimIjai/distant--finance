@@ -102,6 +102,7 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 	mapping(bytes32 => LoanContract) private borrowContract;
 	mapping(address => UserBids) private bids;
 	mapping(address => EnumerableSet.Bytes32Set) private userLoanIds;
+
 	//Modifiers
 	modifier canOpenContract(
 		uint _amount,
@@ -117,6 +118,7 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 		}
 		_;
 	}
+
 	modifier canOpenBid(uint16 _interest, bytes32 _id) {
 		LoanContract storage _loanContract = borrowContract[_id];
 		if (_loanContract.borrower == address(0)) {
@@ -417,7 +419,8 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 		uint _amount,
 		uint _lendingFee
 	) private returns (uint) {
-		(uint256 amount, uint256 ProtocolFee, uint256 collectionFee) = Protocol.calculateFee(_collection, _amount, _lendingFee);
+		(uint256 amount, uint256 ProtocolFee, uint256 collectionFee) = Protocol
+			.calculateFee(_collection, _amount, _lendingFee);
 		uint256 totalFees = ProtocolFee + collectionFee;
 		WETH.safeTransfer(address(Protocol), totalFees);
 		Protocol.updateRevenue(ProtocolFee, collectionFee, _collection);
@@ -485,6 +488,13 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 		}
 	}
 
+	function getUserLoanIds(
+		address _borrower
+	) external view returns (bytes32[] memory) {
+		return userLoanIds[_borrower].values();
+	}
+
+	
 	function getAdmin() external view returns (address) {
 		return admin;
 	}

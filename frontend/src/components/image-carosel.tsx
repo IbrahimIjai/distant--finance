@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ImageCarouselProps {
 	images: string[];
@@ -32,9 +33,17 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 		<div
 			className={cn("relative overflow-hidden", className)}
 			style={{ width: actualWidth, height }}>
-			<img
+			{/* <img
 				src={images[currentIndex]}
 				alt={`Image ${currentIndex + 1}`}
+				style={{ objectFit: "cover" }}
+				className="transition-opacity duration-500"
+			/> */}
+			<Image
+				src={images[currentIndex]}
+				alt={`Image ${currentIndex + 1}`}
+				fill
+				unoptimized
 				style={{ objectFit: "cover" }}
 				className="transition-opacity duration-500"
 			/>

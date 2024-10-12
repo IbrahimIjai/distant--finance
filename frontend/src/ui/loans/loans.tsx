@@ -20,15 +20,7 @@ import {
 	MultiSelectorTrigger,
 } from "@/components/ui/multi-select";
 import { useRouter } from "next/navigation";
-import Img from "@/components/image";
 
-// import Paragraphs from "../Components/Paragraphs";
-// import { MultiSelectInput } from "../Components/Mantine/Multiselect";
-// import Modal4 from "../Modals/Modals4";
-// import LoansComponent from "./Loans";
-// import { LoansPageLoan } from "@/utils/classes";
-// import { ModalType } from "@/utils/enums";
-// import ShowTokens from "../Modals/ShowTokens";
 const Data = [
 	{
 		label: "EYES NFT Collection",
@@ -136,7 +128,7 @@ const LoanCard: React.FC<LoanCardProps> = ({ loan }) => {
 export default function Loans() {
 	// const [filter, setFilter] = useState(filters[0]);
 	const [value, setValue] = useState<string[]>([]);
-	const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+	const [selectedCollections,] = useState<string[]>([]);
 	const [filter, setFilter] = useState(filters[0].value);
 
 	const filteredLoans = useMemo(() => {

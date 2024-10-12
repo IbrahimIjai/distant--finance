@@ -21,7 +21,7 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	contractAddress: Address;
 }) => {
 	const { toast } = useToast();
-	
+
 	const toastRef = useRef<{
 		id: string;
 		dismiss: () => void;
@@ -109,6 +109,7 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 		}, 3000);
 
 		return () => clearTimeout(timer);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		isPending,
 		isTrxSubmitted,

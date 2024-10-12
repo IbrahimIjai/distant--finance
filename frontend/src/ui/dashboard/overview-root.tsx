@@ -33,6 +33,7 @@ const NFTRow: React.FC<NFTRowProps> = ({ nft }) => {
 		<div className="flex items-center justify-between p-3 border-b">
 			<div className="flex items-center space-x-3">
 				<Avatar className="h-10 w-10 border border-primary/20">
+					{/* eslint-disable-next-line  @next/next/no-img-element */}
 					<img
 						src={nft.imageUrl[0] || "/placeholder-image.jpg"}
 						alt={nft.collectionName}

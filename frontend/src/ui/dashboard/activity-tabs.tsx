@@ -6,8 +6,40 @@ import React from "react";
 // import { Input } from "@/components/ui/input";
 // import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { useAccount, useReadContract } from "wagmi";
+import { P2PLENDING } from "@/config";
+import P2PLendingAbi from "@/config/abi/p2p.json";
 export function TabsContainer() {
+	const { address } = useAccount();
+
+	const {
+		data: userLoans,
+		isLoading: isUserLoanLoading,
+		isError,
+		error,
+	} = useReadContract({
+		address: P2PLENDING,
+		args: [address],
+		functionName: "getUserLoanIds",
+		abi: P2PLendingAbi,
+	});
+	const { data: bidValueWithdrawable, isLoading: isBidValieLoading } =
+		useReadContract({
+			address: P2PLENDING,
+			args: [address],
+			functionName: "getLostBidsValue",
+			abi: P2PLendingAbi,
+		});
+
+	console.log({
+		userLoans,
+		bidValueWithdrawable,
+		isBidValieLoading,
+		isUserLoanLoading,
+		isError,
+		error,
+	});
+
 	return (
 		<Tabs defaultValue="tab1" className="w-full">
 			<TabsList className="grid w-full grid-cols-3">

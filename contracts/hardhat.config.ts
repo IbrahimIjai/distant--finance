@@ -35,7 +35,7 @@ const config: HardhatUserConfig = {
   // defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: {
-      default: "0x261386C962c7f035E98C13271218eF5CBD09C47d",
+      default: "0xe726c27385c740A9C3B026891BA0e366B344E318",
     },
     wallet5: {
       default: "0xE3c347cEa95B7BfdB921074bdb39b8571F905f6D",
