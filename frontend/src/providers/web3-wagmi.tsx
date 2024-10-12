@@ -1,6 +1,6 @@
 "use client";
 
-import { wagmiAdapter, projectId } from "@/config";
+import { wagmiAdapter, projectId, SUBGRAPH_URI } from "@/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
 import { base, baseSepolia } from "@reown/appkit/networks";
@@ -14,7 +14,7 @@ import {
 } from "@apollo/client";
 
 const client = new ApolloClient({
-	uri: "https://flyby-router-demo.herokuapp.com/",
+	uri: SUBGRAPH_URI,
 	cache: new InMemoryCache(),
 });
 // Set up queryClient

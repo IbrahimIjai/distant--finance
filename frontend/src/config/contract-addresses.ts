@@ -1,9 +1,13 @@
-export const P2PLENDING = "0xCd4b65980dc32861d384a499b49900b7CdD48632";
-export const TOKENLOCKER = "0xD80c83efc80Da4166Ab44848f3aaA0320A679E3f";
+export const P2PLENDING = "0x990dbBACa4aA72B207C9E8072AF67CD605723c28";
+export const TOKENLOCKER = "0xC536FC545a4D826BF03ebB4231B91373DC8A0eD5";
 export const WETH = "0x4200000000000000000000000000000000000006";
 
 export const ChainID = 8453;
 
+
+//subgraph
+export const SUBGRAPH_URI =
+	"https://api.studio.thegraph.com/query/91430/distantfinance/version/latest";
 
 //supported collections with erc721 interface support
 export const supportedCollections = [

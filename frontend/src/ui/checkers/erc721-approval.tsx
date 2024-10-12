@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { TOKENLOCKER } from "@/config";
 import { useERC721Approval } from "@/hooks/wagmi/useAssetsAllowances";
 import { useDistantWriteContract } from "@/hooks/wagmi/useDistantWriteContract";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { Address, erc721Abi } from "viem";
 
 export interface ApprovalERC721Props {
@@ -20,23 +21,27 @@ export function ApprovalERC721({
 		isSuccess,
 		isError,
 		error,
+		refetch,
 	} = useERC721Approval(collectionAddress, address);
 
-	console.log({ approvalerror: error, isError });
+	console.log({ isApproved, approvalerror: error, isError });
 
 	const {
 		write: approveForAll,
 		isPending,
 		isConfirming,
-		// isWriteContractError,
-		// WriteContractError,
+		isConfirmed,
 	} = useDistantWriteContract({
 		fn: "setApprovalForAll",
 		trxTitle: "Creating Approval for all Tokens in the selected collection",
-		args: [address, true], // The arguments for setApprovalForAll
+		args: [TOKENLOCKER, true], // The arguments for setApprovalForAll
 		abi: erc721Abi,
 		contractAddress: collectionAddress,
 	});
+
+	useEffect(() => {
+		refetch();
+	}, [isConfirmed]);
 
 	const handleApprove = () => {
 		approveForAll();

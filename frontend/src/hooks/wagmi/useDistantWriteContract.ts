@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 export type TrxTitle =
 	| "Creating Approval for all Tokens in the selected collection"
-	| "...";
+	| "Opening Loan Contract";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,

@@ -46,8 +46,9 @@ export function CollectionSelector({
 			collectionName: null,
 		},
 	);
+	const { selectedNFTs, selectNFT, clearSelectedNFTs, setSelectedNFTContract } =
+		useNFTStore();
 
-	const { selectedNFTs, selectNFT, clearSelectedNFTs } = useNFTStore();
 	const [showCompletion, setShowCompletion] = useState(false);
 
 	const { address } = useAccount();
@@ -62,6 +63,7 @@ export function CollectionSelector({
 			collectionAddress: extractedCollectionAddress as Address,
 			collectionName,
 		});
+		setSelectedNFTContract(extractedCollectionAddress as Address);
 		clearSelectedNFTs();
 	};
 
@@ -71,6 +73,7 @@ export function CollectionSelector({
 
 	const handleBack = () => {
 		setSelectedCollection({ collectionAddress: null, collectionName: null });
+		setSelectedNFTContract(null);
 		clearSelectedNFTs();
 	};
 
@@ -82,7 +85,7 @@ export function CollectionSelector({
 	if (showCompletion) {
 		return <CompletionComponent onBack={() => setShowCompletion(false)} />;
 	}
-	// console.log({ selectedCollection });
+
 	return (
 		<div className="flex flex-col gap-3 w-full">
 			<aside>

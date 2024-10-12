@@ -1,41 +1,21 @@
+"use client";
 import React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAccount, useReadContract } from "wagmi";
-import { P2PLENDING } from "@/config";
-import P2PLendingAbi from "@/config/abi/p2p.json";
-import { Skeleton } from "@/components/ui/skeleton";
-import { LoanCard } from "./loan-card";
+import { useAccount } from "wagmi";
+// import { Skeleton } from "@/components/ui/skeleton";
+// import { LoanCard } from "./loan-card";
+import { useQuery } from "@apollo/client";
+import { GET_ACCOUNT_LOANS } from "@/lib/gql-queries";
+
 export function TabsContainer() {
 	const { address } = useAccount();
 
-	const {
-		data: userLoans,
-		isLoading: isUserLoanLoading,
-		isError,
-		error,
-	} = useReadContract({
-		address: P2PLENDING,
-		args: [address],
-		functionName: "getUserLoanIds",
-		abi: P2PLendingAbi,
+	const { data, error, loading } = useQuery(GET_ACCOUNT_LOANS, {
+		variables: { account: address?.toLowerCase(), status: "ACTIVE" },
 	});
-	const { data: bidValueWithdrawable, isLoading: isBidValieLoading } =
-		useReadContract({
-			address: P2PLENDING,
-			args: [address],
-			functionName: "getLostBidsValue",
-			abi: P2PLendingAbi,
-		});
 
-	console.log({
-		userLoans,
-		bidValueWithdrawable,
-		isBidValieLoading,
-		isUserLoanLoading,
-		isError,
-		error,
-	});
+	console.log({ data, error, loading });
 
 	return (
 		<Tabs defaultValue="tab1" className="w-full">
@@ -52,7 +32,7 @@ export function TabsContainer() {
 			</TabsList>
 
 			<TabsContent className="tabContent" value="tab1">
-				{isUserLoanLoading ? (
+				{/* {isUserLoanLoading ? (
 					<div className="flex items-center flex-wrap justify-between">
 						{[1, 2, 3, 4, 5, 6].map((arg) => (
 							<Skeleton key={arg} className="w-52 h-12" />
@@ -70,7 +50,7 @@ export function TabsContainer() {
 					<div>
 						<p>No loan found.</p>
 					</div>
-				)}
+				)} */}
 				<div>Hello active loans</div>
 			</TabsContent>
 			<TabsContent className="tabContent" value="tab2">

@@ -29,7 +29,7 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 	uint16 private protocolFee = 1000; // 10% == 1000;
 	uint8 private minExpiryDay = 7;
 	uint8 private maxExpiryDay = 90;
-	uint private minBorrowAmount = 100000000 gwei; // 0.1 ETH
+	uint private minBorrowAmount = 200000000000000; // 0.0002 ETH
 	uint16 private constant aprDivider = 10000; // 100% == 10000;
 	uint16 private minInterest = 100; // 1% == 100;
 
@@ -494,7 +494,6 @@ contract P2PLending is Context, ReentrancyGuard, Pausable {
 		return userLoanIds[_borrower].values();
 	}
 
-	
 	function getAdmin() external view returns (address) {
 		return admin;
 	}
