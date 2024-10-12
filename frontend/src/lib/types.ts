@@ -95,3 +95,26 @@ export interface RaribleNft {
 		name: string;
 	};
 }
+
+//LOAN
+
+export interface ActiveLoan {
+	amount: number;
+	duration: number;
+	id: string;
+	interest: number;
+	lender: string | null;
+	borrower?: string | null;
+	checkPointBlock: number;
+	lockId: string;
+}
+
+export interface UserLoan {
+	id: string; // This will be the bytes32 id
+	borrower: string;
+	lender: string;
+	interest: bigint;
+	amount: bigint;
+	expiry: bigint;
+	lockId: string; // This is the bytes32 lockId
+}

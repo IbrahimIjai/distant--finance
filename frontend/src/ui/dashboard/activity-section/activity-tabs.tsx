@@ -1,14 +1,11 @@
 import React from "react";
-// import * as Tabs from "@radix-ui/react-tabs";
-// import ActiveLoans from "./activeLoan";
-// import PendingLoans from "./pendingLoan";
-// import LoanBids from "./loanBid";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccount, useReadContract } from "wagmi";
 import { P2PLENDING } from "@/config";
 import P2PLendingAbi from "@/config/abi/p2p.json";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoanCard } from "./loan-card";
 export function TabsContainer() {
 	const { address } = useAccount();
 
@@ -55,7 +52,25 @@ export function TabsContainer() {
 			</TabsList>
 
 			<TabsContent className="tabContent" value="tab1">
-				{/* <ActiveLoans /> */}
+				{isUserLoanLoading ? (
+					<div className="flex items-center flex-wrap justify-between">
+						{[1, 2, 3, 4, 5, 6].map((arg) => (
+							<Skeleton key={arg} className="w-52 h-12" />
+						))}
+					</div>
+				) : userLoans.length ? (
+					<div>
+						{userLoans.map((item, i) => (
+							<div key={i}>
+								<LoanCard loan={item} />
+							</div>
+						))}
+					</div>
+				) : (
+					<div>
+						<p>No loan found.</p>
+					</div>
+				)}
 				<div>Hello active loans</div>
 			</TabsContent>
 			<TabsContent className="tabContent" value="tab2">

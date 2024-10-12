@@ -7,6 +7,16 @@ import { base, baseSepolia } from "@reown/appkit/networks";
 import React, { type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
+import {
+	ApolloClient,
+	InMemoryCache,
+	ApolloProvider,
+} from "@apollo/client";
+
+const client = new ApolloClient({
+	uri: "https://flyby-router-demo.herokuapp.com/",
+	cache: new InMemoryCache(),
+});
 // Set up queryClient
 const queryClient = new QueryClient();
 
@@ -56,7 +66,7 @@ function WagmiContextProvider({
 					apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
 					// @ts-expect-error: type mismatch between base and OnchainKitProvider chain prop
 					chain={base}>
-					{children}
+					<ApolloProvider client={client}>{children}</ApolloProvider>
 				</OnchainKitProvider>
 			</QueryClientProvider>
 		</WagmiProvider>

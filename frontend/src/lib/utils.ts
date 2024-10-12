@@ -17,3 +17,16 @@ export function shortenAddress(address: string, characters = 4): string {
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
+
+export const slice = (address: string) => {
+	const account = address?.toLowerCase();
+	return `${account?.slice(0, 5)}...${account?.slice(38, 42)}`;
+};
+export function isExpired(timestamp: number) {
+	const now = Date.now() / 1000;
+	const timeDiff = timestamp - now;
+	if (timeDiff <= 0) {
+		return true;
+	}
+	return false;
+}

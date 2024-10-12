@@ -5,7 +5,7 @@ import React from "react";
 import { useAccount } from "wagmi";
 import DashboardAction from "./dashboard-action";
 import Overview from "./overview-root";
-import { TabsContainer } from "./activity-tabs";
+import { TabsContainer } from "./activity-section/activity-tabs";
 
 export default function DashboardMain() {
 	const { isConnected } = useAccount();
