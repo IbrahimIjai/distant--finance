@@ -1,9 +1,8 @@
-export const P2PLENDING = "0x990dbBACa4aA72B207C9E8072AF67CD605723c28";
+export const P2PLENDING = "0x8F4A73208f6D7ccf59cfF8f082B68F72284f7a99";
 export const TOKENLOCKER = "0xC536FC545a4D826BF03ebB4231B91373DC8A0eD5";
 export const WETH = "0x4200000000000000000000000000000000000006";
 
 export const ChainID = 8453;
-
 
 //subgraph
 export const SUBGRAPH_URI =
@@ -19,6 +18,3 @@ export const supportedCollections = [
 
 	"0x479ad14Bd2e2D84Da77276F6eaB89Ad8E078497d", //Base OnChain Punks (BOCP)
 ];
-
-
-

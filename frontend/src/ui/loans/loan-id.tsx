@@ -9,6 +9,8 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MoveLeft } from "lucide-react";
+import { useQuery } from "@apollo/client";
+import { GET_LOAN } from "@/lib/gql-queries";
 
 // Mock data and types
 interface LoanType {
@@ -95,9 +97,14 @@ const TransactionsTable: React.FC<{ height: number }> = () => (
 	</div>
 );
 
-const LoanIdComponent: React.FC<{ id: string }> = () => {
+const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 	const AnalyticsHeightRef = useRef<HTMLDivElement>(null);
+	console.log({ id });
+	const { data, error, loading, refetch } = useQuery(GET_LOAN, {
+		variables: { ID: id.toLowerCase() },
+	});
 
+	console.log({ data, error, loading, refetch });
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [modal, setModal] = useState<ModalType>(ModalType.INACTIVE);
 	const [refresh, setRefresh] = useState<boolean>(false);

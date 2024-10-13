@@ -20,25 +20,20 @@ import {
 	MultiSelectorTrigger,
 } from "@/components/ui/multi-select";
 import { useRouter } from "next/navigation";
-
-const Data = [
-	{
-		label: "EYES NFT Collection",
-		value: "EYES NFT Collection",
-	},
-	{
-		label: "Crazy Arts",
-		value: "Crazy Arts",
-	},
-	{
-		label: "Crazy Arts vV",
-		value: "Crazy Arts vV",
-	},
-	{
-		label: "EyeBalls Collection",
-		value: "EyeBalls Collection",
-	},
-];
+import { useQuery } from "@apollo/client";
+import { GET_LOANS } from "@/lib/gql-queries";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatEther } from "viem";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Lock, Percent } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileSearch, RefreshCw, PlusCircle } from "lucide-react";
 
 interface Loan {
 	id: number;
@@ -48,49 +43,6 @@ interface Loan {
 	collection: string;
 	tokens: number;
 }
-
-const mockLoans: Loan[] = [
-	{
-		id: 1,
-		amount: 1000,
-		interest: 5,
-		duration: 30,
-		collection: "EYES NFT Collection",
-		tokens: 3,
-	},
-	{
-		id: 2,
-		amount: 2000,
-		interest: 7,
-		duration: 60,
-		collection: "Crazy Arts",
-		tokens: 5,
-	},
-	{
-		id: 3,
-		amount: 1500,
-		interest: 6,
-		duration: 45,
-		collection: "Crazy Arts vV",
-		tokens: 4,
-	},
-	{
-		id: 4,
-		amount: 3000,
-		interest: 8,
-		duration: 90,
-		collection: "EyeBalls Collection",
-		tokens: 7,
-	},
-	{
-		id: 5,
-		amount: 500,
-		interest: 4,
-		duration: 15,
-		collection: "EYES NFT Collection",
-		tokens: 2,
-	},
-];
 
 const filters = [
 	{ value: "all", label: "All" },
@@ -104,35 +56,48 @@ const filters = [
 	{ value: "locked_tokens_low_high", label: "Locked Tokens: Low to High" },
 ];
 
+interface Collection {
+	label: string;
+	value: string;
+}
+
 interface LoanCardProps {
 	loan: Loan;
 }
 
-const LoanCard: React.FC<LoanCardProps> = ({ loan }) => {
-	const { push } = useRouter();
-	return (
-		<div
-			onClick={() => push(`/loans/${loan.id}`)}
-			className="border shadow-md rounded-lg p-4 m-2 cursor-pointer">
-			<h3 className="font-bold">Loan #{loan.id}</h3>
-			{/* <Img}/> */}
-			<p>Amount: ${loan.amount}</p>
-			<p>Interest: {loan.interest}%</p>
-			<p>Duration: {loan.duration} days</p>
-			<p>Collection: {loan.collection}</p>
-			<p>Tokens: {loan.tokens}</p>
-		</div>
-	);
-};
-
 export default function Loans() {
-	// const [filter, setFilter] = useState(filters[0]);
 	const [value, setValue] = useState<string[]>([]);
-	const [selectedCollections,] = useState<string[]>([]);
+	const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
 	const [filter, setFilter] = useState(filters[0].value);
 
+	const { data, loading, error } = useQuery(GET_LOANS);
+	console.log({ data, loading, error });
+
+	//@ts-expect-error: types error
+	const collections: Collection[] = useMemo(() => {
+		if (!data) return [];
+		const collectionSet = new Set(
+			//@ts-expect-error: types error
+			data.loanContracts.map((loan) => ({
+				label: loan.lockId.collection.name,
+				value: loan.lockId.collection.name,
+			})),
+		);
+		console.log({ collectionSet });
+		return Array.from(collectionSet);
+	}, [data]);
+
+	const resetFilters = () => {
+		setSelectedCollections([]);
+		setFilter(filters[0].value);
+	};
+
 	const filteredLoans = useMemo(() => {
-		let result = [...mockLoans];
+		if (!data) {
+			console.log("NOOOO DATA.......");
+		}
+		if (!data) return [];
+		let result = [...data.loanContracts];
 
 		// Filter by selected collections
 		if (selectedCollections.length > 0) {
@@ -141,7 +106,7 @@ export default function Loans() {
 			);
 		}
 
-		// Apply sorting based on filter
+		// // Apply sorting based on filter
 		switch (filter) {
 			case "principal_high_low":
 				result.sort((a, b) => b.amount - a.amount);
@@ -172,7 +137,11 @@ export default function Loans() {
 		}
 
 		return result;
-	}, [selectedCollections, filter]);
+	}, [selectedCollections, filter, data]);
+
+	if (error) {
+		return <div>Error loading loans. Please try again.</div>;
+	}
 
 	return (
 		<div className="px-10 py-[5%]">
@@ -185,8 +154,8 @@ export default function Loans() {
 						</MultiSelectorTrigger>
 						<MultiSelectorContent className="w-full lg:w-[300px]">
 							<MultiSelectorList>
-								{Data.map((option, i) => (
-									<MultiSelectorItem key={i} value={option.value}>
+								{collections?.map((option) => (
+									<MultiSelectorItem key={option.value} value={option.value}>
 										{option.label}
 									</MultiSelectorItem>
 								))}
@@ -212,16 +181,166 @@ export default function Loans() {
 			</div>
 			{/* {getModal()} */}
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				{filteredLoans.length === 0 ? (
-					<div className="col-span-full text-center py-10">
-						No Pending Loans found
-					</div>
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+				{loading ? (
+					Array.from({ length: 6 }).map((_, index) => (
+						<Card key={index} className="w-full max-w-md overflow-hidden">
+							<CardHeader className="p-0">
+								<Skeleton className="h-48 w-full" />
+							</CardHeader>
+							<CardContent className="pt-6">
+								<Skeleton className="h-8 w-3/4 mb-4" />
+								<Skeleton className="h-4 w-full mb-2" />
+								<Skeleton className="h-4 w-full mb-2" />
+								<Skeleton className="h-4 w-full" />
+							</CardContent>
+							<CardFooter>
+								<Skeleton className="h-10 w-full" />
+							</CardFooter>
+						</Card>
+					))
+				) : filteredLoans.length === 0 ? (
+					<NoLoansFound type="all" onReset={resetFilters} />
 				) : (
-					filteredLoans.map((loan) => <LoanCard key={loan.id} loan={loan} />)
+					filteredLoans.map((loan) => (
+						<LoanCard key={loan.id} loan={loan} isLoading={false} />
+					))
 				)}
 			</div>
-			{/* <LoansComponent {...{ setModal, filter, search, setLoan }} /> */}
 		</div>
 	);
 }
+
+interface LoanCardProps {
+	id: string;
+	amount: string;
+	interest: number;
+	expiry: string;
+	lockId: {
+		collection: {
+			name: string;
+			symbol: string;
+		};
+		tokens: string[];
+	};
+}
+
+export const LoanCard = ({
+	loan,
+	isLoading = false,
+}: {
+	loan: LoanCardProps;
+	isLoading: boolean;
+}) => {
+	const { push } = useRouter();
+	if (isLoading) {
+		return (
+			<Card className="w-full max-w-md overflow-hidden">
+				<CardHeader className="p-0">
+					<Skeleton className="h-48 w-full" />
+				</CardHeader>
+				<CardContent className="pt-6">
+					<Skeleton className="h-8 w-3/4 mb-4" />
+					<Skeleton className="h-4 w-full mb-2" />
+					<Skeleton className="h-4 w-full mb-2" />
+					<Skeleton className="h-4 w-full" />
+				</CardContent>
+				<CardFooter>
+					<Skeleton className="h-10 w-full" />
+				</CardFooter>
+			</Card>
+		);
+	}
+
+	const amount = parseFloat(formatEther(BigInt(loan.amount)));
+	const apr = loan.interest / 100;
+	const daysLeft = parseInt(loan.expiry);
+
+	return (
+		<Card className="w-full max-w-md overflow-hidden">
+			<CardHeader className="p-0">
+				<img
+					src={`/images/loan.png`}
+					alt={`${loan.lockId.collection.name} visualization`}
+					className="w-full h-48 object-cover"
+				/>
+			</CardHeader>
+			<CardContent className="pt-6">
+				<div className="flex justify-between items-center mb-4">
+					<span className="text-xl font-semibold">{amount.toFixed(6)} ETH</span>
+					<Badge variant="secondary">{loan.lockId.collection.name}</Badge>
+				</div>
+				<div className="space-y-2">
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-muted-foreground flex items-center">
+							<Percent className="mr-2 h-4 w-4" /> APR:
+						</span>
+						<span className="text-sm font-medium">{apr.toFixed(2)}%</span>
+					</div>
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-muted-foreground flex items-center">
+							<Clock className="mr-2 h-4 w-4" /> Duration:
+						</span>
+						<span className="text-sm font-medium">{daysLeft} days left</span>
+					</div>
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-muted-foreground flex items-center">
+							<Lock className="mr-2 h-4 w-4" /> Locked Tokens:
+						</span>
+						<span className="text-sm font-medium">
+							{/* {loan.lockId.tokens.length} */}NaN
+						</span>
+					</div>
+				</div>
+			</CardContent>
+			<CardFooter>
+				<Button className="w-full" onClick={() => push(`/loans/${loan.id}`)}>
+					View Loan Details
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+};
+
+interface NoLoansFoundProps {
+	type: "active" | "pending" | "all";
+	onReset?: () => void;
+}
+
+export const NoLoansFound: React.FC<NoLoansFoundProps> = ({
+	type,
+	onReset,
+}) => {
+	const { push } = useRouter();
+	const messages = {
+		active: "No active loans found",
+		pending: "No pending loan requests",
+		all: "No loans available",
+	};
+
+	const descriptions = {
+		active: "There are currently no active loans matching your criteria.",
+		pending: "There are no pending loan requests at the moment.",
+		all: "It looks like there are no loans in the system right now.",
+	};
+
+	return (
+		<Card className="w-full max-w-md mx-auto">
+			<CardContent className="flex flex-col items-center text-center p-6">
+				<FileSearch className="h-16 w-16 text-muted-foreground mb-4" />
+				<h3 className="text-lg font-semibold mb-2">{messages[type]}</h3>
+				<p className="text-muted-foreground mb-6">{descriptions[type]}</p>
+				<div className="flex flex-col sm:flex-row gap-3">
+					{onReset && (
+						<Button variant="outline" onClick={onReset}>
+							<RefreshCw className="mr-2 h-4 w-4" /> Reset Filters
+						</Button>
+					)}
+					<Button onClick={() => push("./dashboard")}>
+						<PlusCircle className="mr-2 h-4 w-4" /> Create Loan Request
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+};

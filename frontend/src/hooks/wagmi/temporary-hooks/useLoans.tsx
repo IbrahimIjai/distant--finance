@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
 
 export function useUserLoans(address: string | undefined) {
+
 	const { data: loanIds } = useReadContract({
 		address: P2PLENDING,
 		abi: P2PLendingAbi,
@@ -15,7 +16,7 @@ export function useUserLoans(address: string | undefined) {
 	const loans = useReadContracts({
 		contracts:
 		//@ts-expect-error: unknown type
-			loanIds.map((id) => ({
+			loanIds?.map((id) => ({
 				address: P2PLENDING,
 				abi: P2PLendingAbi,
 				functionName: "getLoanData",
@@ -26,7 +27,7 @@ export function useUserLoans(address: string | undefined) {
 	return useMemo(() => {
 		if (!loanIds || !loans.data) return null;
 		//@ts-expect-error: unknown type
-		return loanIds.map((id, index) => {
+		return loanIds?.map((id, index) => {
 			const [borrower, lender, interest, amount, expiry, lockId] = loans.data[
 				index
 			].result as [string, string, bigint, bigint, bigint, string];

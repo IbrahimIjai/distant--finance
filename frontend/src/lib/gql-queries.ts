@@ -23,7 +23,72 @@ const lockID = gql`
 	}
 `;
 
+const accountStats = gql`
+	fragment accountStats on accountStatistic {
+		borrowCount
+		defaultCount
+		earnedInterest
+		lendCount
+		paidInterest
+		totalBorrowedAmount
+		totalLentAmount
+	}
+`;
+
+const TX = gql`
+	fragment TX on transaction {
+		txType
+		id
+	}
+`;
+
+//LOANS /LOANID
+
+export const GET_LOAN = gql`
+	query MyQuery($ID: ID) {
+		loanContract(id: $ID) {
+			...loanContract
+			status
+			checkPointBlock
+			lockId {
+				...lockID
+				transaction {
+					...TX
+				}
+			}
+			borrower {
+				id
+				accountStatistic {
+					...accountStats
+				}
+			}
+			bids {
+				proposedInterest
+				bidder {
+					id
+				}
+			}
+		}
+	}
+	${loanContract}
+	${accountStats}
+	${TX}
+	${lockID}
+`;
 //USER ACCOUNT(DASHBOARD)
+
+export const GET_LOANS = gql`
+	query MyQuery {
+		loanContracts(where: { status: PENDING }) {
+			...loanContract
+			lockId {
+				...lockID
+			}
+		}
+	}
+	${loanContract}
+	${lockID}
+`;
 
 export const GET_ACCOUNT_LOANS = gql`
 	query MyQuery($account: String!, $status: LoanStatus) {

@@ -58,7 +58,7 @@ export function CollectionSelector({
 		collectionAddress: Address,
 	) => {
 		const extractedCollectionAddress = extractAddress(collectionAddress);
-		console.log({ extractedCollectionAddress });
+		// console.log({ extractedCollectionAddress });
 		setSelectedCollection({
 			collectionAddress: extractedCollectionAddress as Address,
 			collectionName,
@@ -158,9 +158,9 @@ export function CollectionSelector({
 				) : (
 					Object.entries(processedNFTData).map(
 						([collectionName, collectionData]) => {
-							console.log({
-								address: extractAddress(collectionData.collectionAddress),
-							});
+							// console.log({
+							// 	address: extractAddress(collectionData.collectionAddress),
+							// });
 							const addressToCheck = extractAddress(
 								collectionData.collectionAddress,
 							);
