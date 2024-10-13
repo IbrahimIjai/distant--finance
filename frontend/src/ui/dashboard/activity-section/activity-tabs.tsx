@@ -2,11 +2,13 @@
 import React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 // import { Skeleton } from "@/components/ui/skeleton";
 // import { LoanCard } from "./loan-card";
 import { useQuery } from "@apollo/client";
 import { GET_ACCOUNT_LOANS } from "@/lib/gql-queries";
+import { P2PLENDING } from "@/config";
+import p2pLendingAbi from "@/config/abi/p2p.json"
 
 export function TabsContainer() {
 	const { address } = useAccount();
@@ -17,6 +19,14 @@ export function TabsContainer() {
 
 	console.log({ data, error, loading });
 
+	const {data:userloanId,} = useReadContract({
+		address: P2PLENDING,
+		abi: p2pLendingAbi,
+		args:[address],
+		functionName: "getUserLoanIds"
+	})
+
+	console.log({ userloanId });
 	return (
 		<Tabs defaultValue="tab1" className="w-full">
 			<TabsList className="grid w-full grid-cols-3">

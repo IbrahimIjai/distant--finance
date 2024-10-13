@@ -24,10 +24,12 @@ const func = async function () {
 
   await distantFinance.addProtocol(tokenLocker.address, "tokenLocker", royaltyFees, royaltyFees);
   await distantFinance.addProtocol(p2pLending.address, "p2plending", royaltyFees, royaltyFees);
+  await distantFinance.addProtocol(deployer, "me", royaltyFees, royaltyFees);
 
   const protocol1 = await distantFinance.isSupportedProtocol(tokenLocker.address);
   const protocol2 = await distantFinance.isSupportedProtocol(p2pLending.address);
-  console.log({ protocol1, protocol2 });
+  const protocol3 = await distantFinance.isSupportedProtocol(deployer);
+  console.log({ protocol1, protocol2, protocol3 });
 };
 
 func();
