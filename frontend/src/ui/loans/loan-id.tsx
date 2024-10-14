@@ -8,10 +8,17 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { MoveLeft } from "lucide-react";
+import { AlertCircle, MoveLeft } from "lucide-react";
 import { useQuery } from "@apollo/client";
 import { GET_LOAN } from "@/lib/gql-queries";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import { useReadContract } from "wagmi";
+import { P2PLENDING, TOKENLOCKER } from "@/config";
+import tokenLockerAbi from "@/config/abi/tokenlocker.json";
+import p2pLendingAbi from "@/config/abi/p2p.json";
+import { Address, zeroAddress } from "viem";
+import { P2PLENDING_ABI, TOKENLOCKER_ABI } from "@/config/abi";
+import { useLoanTokens } from "@/hooks/wagmi/temporary-hooks/useLoanTokens";
 // Mock data and types
 interface LoanType {
 	id: string;
@@ -105,6 +112,11 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 	});
 
 	console.log({ data, error, loading, refetch });
+
+	const { lockedTokensData } = useLoanTokens(id as Address);
+	console.log({ lockedTokensDataOnFrontend: lockedTokensData });
+
+	// console.log({ nftData: data?.loanContract.lockId.collection.id });
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [modal, setModal] = useState<ModalType>(ModalType.INACTIVE);
 	const [refresh, setRefresh] = useState<boolean>(false);
@@ -115,52 +127,65 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 
 	const analyticsHeight = AnalyticsHeightRef.current?.clientHeight || 0;
 
-	function getModal() {
-		// Mock modal logic
-		return null;
-	}
-
 	return (
-		<div className="main">
+		<div className="container mx-auto p-4">
 			<div className="container">
-				<div className="flex justify-between">
-					<Link href="/loans" className="flex gap-2 items-center w-fit">
-						<MoveLeft color="white" />
-						<span>Back to Loans</span>
+				<div className="flex justify-between items-center mb-6">
+					<Link
+						href="/loans"
+						className="flex items-center text-primary/60 hover:text-primary">
+						<MoveLeft className="mr-2" />
+						Back to Loans
 					</Link>
-					<span className="flex gap-1 items-center">
-						status
-						<TooltipWrapper status={loan.status} />
-					</span>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div className="flex items-center">
+									{loading ? (
+										<Skeleton className="w-16 h-6" />
+									) : (
+										<span
+											className={`${getColor(
+												data?.loanContract.status,
+											)} mr-2 text-sm font-semibold`}>
+											Status: {data?.loanContract.status}
+										</span>
+									)}
+									<AlertCircle size={16} />
+								</div>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Current status of the loan</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				</div>
-				<LoanContext.Provider value={loan}>
-					<div className="header-container">
-						<ImageComponent setModal={setModal} />
-						<aside className="flex flex-col gap-2 items-end w-full">
-							<LoanBox setModal={setModal} />
-							<button
-								onClick={() => setRefresh(true)}
-								className={refresh ? "refresh" : ""}>
-								Refresh
-							</button>
-						</aside>
-					</div>
-					<div className="flex flex-col md:flex-row gap-4 w-full items-start mt-4">
-						{lender.accountStatistic ? (
-							<Analytics reference={AnalyticsHeightRef} account={lender} />
-						) : (
-							<TransactionsTable height={analyticsHeight} />
-						)}
-						<Analytics reference={AnalyticsHeightRef} account={borrower} />
-					</div>
-					{lender.accountStatistic && (
-						<div className="mt-4">
-							<TransactionsTable height={analyticsHeight} />
-						</div>
+				{/* <LoanContext.Provider value={loan}> */}
+				<div className="header-container">
+					<ImageComponent setModal={setModal} />
+					<aside className="flex flex-col gap-2 items-end w-full">
+						<LoanBox setModal={setModal} />
+						<button
+							onClick={() => setRefresh(true)}
+							className={refresh ? "refresh" : ""}>
+							Refresh
+						</button>
+					</aside>
+				</div>
+				<div className="flex flex-col md:flex-row gap-4 w-full items-start mt-4">
+					{lender.accountStatistic ? (
+						<Analytics reference={AnalyticsHeightRef} account={lender} />
+					) : (
+						<TransactionsTable height={analyticsHeight} />
 					)}
-				</LoanContext.Provider>
+					<Analytics reference={AnalyticsHeightRef} account={borrower} />
+				</div>
+				{lender.accountStatistic && (
+					<div className="mt-4">
+						<TransactionsTable height={analyticsHeight} />
+					</div>
+				)}
 			</div>
-			{getModal()}
 		</div>
 	);
 };
