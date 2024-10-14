@@ -24,27 +24,13 @@ import {
 import { useDistantWriteContract } from "@/hooks/wagmi/useDistantWriteContract";
 import { P2PLENDING } from "@/config";
 import { parseEther, parseUnits } from "viem";
+import { P2PLENDING_ABI } from "@/config/abi";
 interface LoanData {
 	amount: string;
 	interest: string;
 	duration: number;
 }
 
-const P2P_LENDING_ABI = [
-	{
-		inputs: [
-			{ name: "_collection", type: "address" },
-			{ name: "_tokens", type: "uint256[]" },
-			{ name: "_amountToBorrow", type: "uint256" },
-			{ name: "_expiryInDays", type: "uint8" },
-			{ name: "_interestToPay", type: "uint16" },
-		],
-		name: "openContract",
-		outputs: [],
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-];
 
 export default function CompletionComponent({
 	onBack,
@@ -62,9 +48,6 @@ export default function CompletionComponent({
 		isPending,
 		isConfirming,
 		isTrxSubmitted,
-		isConfirmed,
-		isWriteContractError,
-		isWaitTrxError,
 		WriteContractError,
 		WaitForTransactionReceiptError,
 	} = useDistantWriteContract({
@@ -77,12 +60,11 @@ export default function CompletionComponent({
 			BigInt(loanData.duration),
 			parseUnits(loanData.interest || "0", 2),
 		],
-		abi: P2P_LENDING_ABI,
+		abi: P2PLENDING_ABI,
 		contractAddress: P2PLENDING,
 	});
 
 	console.log({
-	
 		WriteContractError,
 		WaitForTransactionReceiptError,
 	});

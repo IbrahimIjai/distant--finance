@@ -1,6 +1,6 @@
 import { useReadContract } from "wagmi";
 import { P2PLENDING_ABI, TOKENLOCKER_ABI } from "@/config/abi";
-import { Address, } from "viem";
+import { Address } from "viem";
 import { P2PLENDING, TOKENLOCKER } from "@/config";
 
 export function useLoanTokens(loanId: Address) {
@@ -21,15 +21,13 @@ export function useLoanTokens(loanId: Address) {
 			args: lockerAddress ? [lockerAddress] : undefined,
 		});
 
-	// Process the lockedTokensData to extract token details
-	console.log({ lockedTokensData });
-	// const tokenDetails: TokenDetails[] = lockedTokensData
-	// 	? lockedTokensData.map((token: any) => ({
-	// 			tokenId: token.tokenId,
-	// 			collectionName: token.collectionName,
-	// 			// Map other relevant fields here
-	// 	  }))
-	// 	: [];
+	const tokenDetails = lockedTokensData
+		? lockedTokensData.tokens.map((token: bigint) => Number(token))
+		: [];
+
+	console.log({ tokenDetails });
+	// console.log({ lockedTokensData });
+
 
 	const isLoading = isLoanDataLoading || isLockedTokensLoading;
 
@@ -37,5 +35,6 @@ export function useLoanTokens(loanId: Address) {
 		lockedTokensData,
 		isLoading,
 		loanData,
+		tokenDetails,
 	};
 }

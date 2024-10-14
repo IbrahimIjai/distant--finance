@@ -97,6 +97,13 @@ export interface RaribleNft {
 }
 
 //LOAN
+export enum LoanStatus {
+	ACTIVE = "ACTIVE",
+	CLOSED = "CLOSED",
+	LIQUIDATED = "LIQUIDATED",
+	LOAN_REPAID = "LOAN_REPAID",
+	PENDING = "PENDING",
+}
 
 export interface ActiveLoan {
 	amount: number;

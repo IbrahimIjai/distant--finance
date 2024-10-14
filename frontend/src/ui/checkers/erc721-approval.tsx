@@ -41,7 +41,7 @@ export function ApprovalERC721({
 
 	useEffect(() => {
 		refetch();
-	}, [isConfirmed]);
+	}, [isConfirmed, refetch]);
 
 	const handleApprove = () => {
 		approveForAll();
