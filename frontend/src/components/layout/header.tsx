@@ -3,7 +3,7 @@ import React from "react";
 import { Logo } from "../ui/logo";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import useMediaQuery from "@/hooks/useMediaQuery";
+// import useMediaQuery from "@/hooks/useMediaQuery";
 import {
 	Sheet,
 	SheetContent,
@@ -42,38 +42,34 @@ const NavLinks: links[] = [
 
 export default function Header() {
 	const pathname = usePathname();
-	const isDesktop = useMediaQuery("(min-width: 900px)");
+	// const isDesktop = useMediaQuery("(min-width: 900px)");
 	return (
 		<div className="fixed bg-background/40 backdrop-blur-lg px-6 py-4 top-0 inset-x-0 w-full flex justify-between items-center">
 			<Logo />
 
-			{isDesktop ? (
-				<>
-					<div className="flex gap-[2rem] ">
-						{NavLinks.map(({ route, title }, i) => (
-							<Link
-								href={route}
-								key={i}
-								className={`${
-									pathname === route
-										? "text-primary hover:scale-105"
-										: "text-muted-foreground"
-								} hover:text-primary hover:scale-105 transition-colors duration-300`}>
-								{/* Fix the color here */}
-								{title}
-							</Link>
-						))}
-					</div>
-					<div className="flex items-center">
-						<CustomConnectButton />
-					</div>
-				</>
-			) : (
-				<div className="flex gap-4">
-					<CustomConnectButton />
-					<MobileNavBtn />
-				</div>
-			)}
+			<div className=" gap-[2rem] hidden lg:flex">
+				{NavLinks.map(({ route, title }, i) => (
+					<Link
+						href={route}
+						key={i}
+						className={`${
+							pathname === route
+								? "text-primary hover:scale-105"
+								: "text-muted-foreground"
+						} hover:text-primary hover:scale-105 transition-colors duration-300`}>
+						{/* Fix the color here */}
+						{title}
+					</Link>
+				))}
+			</div>
+			<div className="flex items-center">
+				<CustomConnectButton />
+			</div>
+
+			<div className="flex gap-4 lg:hidden">
+				<CustomConnectButton />
+				<MobileNavBtn />
+			</div>
 		</div>
 	);
 }
