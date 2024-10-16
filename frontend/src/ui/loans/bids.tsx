@@ -51,6 +51,8 @@ export function BidsTable({
 	if (loading) {
 		return <BidsTableSkeleton />;
 	}
+	const isBorrower =
+		borrower.toString().toLowerCase() === address?.toString().toLowerCase();
 
 	return (
 		<div className="p-4 space-y-4 border bg-card rounded-lg  w-full">
@@ -74,17 +76,22 @@ export function BidsTable({
 									<p className="text-lg font-semibold text-gray-700 mb-2">
 										Bids are not yet placed
 									</p>
-									<TransactionDialog
-										trigger={<Button>Place Bid</Button>}
-										title="Place a Bid"
-										trxTitle="Placing a bid..."
-										description="Set your proposed interest rate for this loan">
-										<BidComponent
-											loanId={loanId}
-											loanAmount={BigInt(amount)}
-											contractAddress={P2PLENDING}
-										/>
-									</TransactionDialog>
+									{!isBorrower && (
+										<TransactionDialog
+											trigger={<Button>Place Bid</Button>}
+											title="Place a Bid"
+											trxTitle="Placing a bid..."
+											confirmButtonText="Place Bid"
+											description={`Deposit ${formatEther(
+												BigInt(amount),
+											)} WETH/ETH with your proposed interest rate`}>
+											<BidComponent
+												loanId={loanId}
+												loanAmount={amount}
+												contractAddress={P2PLENDING}
+											/>
+										</TransactionDialog>
+									)}
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>

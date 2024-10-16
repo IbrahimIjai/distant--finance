@@ -1,21 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useAccount, useBalance } from "wagmi";
 import { formatEther, Address } from "viem";
 import { useTransactionStore, TransactionType } from "@/store/transactionStore";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { ToastAction } from "@/components/ui/toast";
-import Link from "next/link";
 import { P2PLENDING_ABI } from "@/config/abi";
-import { useToast } from "@/hooks/use-toast";
+import { Coins, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useForm, Controller } from "react-hook-form";
 
 interface BidComponentProps {
 	loanId: string;
-	loanAmount: bigint;
+	loanAmount: string;
 	contractAddress: Address;
 }
 
@@ -26,133 +29,189 @@ const presetInterestRates = [
 	{ value: "12000", label: "120%" },
 ];
 
+interface BidFormData {
+	interestRate: string;
+	selectedToken: "ETH" | "WETH";
+}
+
 export function BidComponent({
 	loanId,
 	loanAmount,
 	contractAddress,
 }: BidComponentProps) {
-	const [interestRate, setInterestRate] = useState("10500");
-	const [customRate, setCustomRate] = useState("");
-	const [useCustomRate, setUseCustomRate] = useState(false);
-	const [useWETH, setUseWETH] = useState(false);
 	const { address } = useAccount();
 	const { data: ethBalance } = useBalance({ address });
 	const { data: wethBalance } = useBalance({
 		address,
 		token: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-	}); // WETH address
+	});
 	const setTransaction = useTransactionStore((state) => state.setTransaction);
-	const { toast } = useToast();
 
-	const effectiveRate =  interestRate;
-	const isHighInterest = Number(effectiveRate) > 15000; // 150%
+	const { control, watch } = useForm<BidFormData>({
+		defaultValues: {
+			interestRate: "10500",
+			selectedToken: "ETH",
+		},
+	});
 
-	const handleSubmit = () => {
-		const balance = useWETH ? wethBalance?.value : ethBalance?.value;
-		if (!balance || balance < loanAmount) {
-			toast({
-				title: "Insufficient balance",
-				description: `You don't have enough ${
-					useWETH ? "WETH" : "ETH"
-				} to place this bid.`,
-				action: (
-					<ToastAction altText="Swap" asChild>
-						<Link href="/swap">Swap tokens</Link>
-					</ToastAction>
-				),
-			});
-			return;
-		}
+	const interestRate = watch("interestRate");
+	const selectedToken = watch("selectedToken");
 
+	useEffect(() => {
+		const isReady = interestRate !== "" && selectedToken !== undefined;
 		setTransaction({
-			isOpen: true,
+			isReady,
 			type: TransactionType.BID,
-			args: [effectiveRate, loanId],
+			args: [Number(interestRate), loanId],
 			contractAddress,
 			abi: P2PLENDING_ABI,
-			functionName: useWETH ? "bidInWETH" : "bidInETH",
+			functionName: selectedToken === "WETH" ? "bidInWETH" : "bidInETH",
+			value: selectedToken === "ETH" ? loanAmount : null,
 		});
+	}, [interestRate, selectedToken, loanId, contractAddress, setTransaction]);
+
+	const formatInterestRate = (rate: string) => {
+		return `${(Number(rate) / 100).toFixed(2)}%`;
+	};
+
+	const formatBalance = (balance: bigint | undefined) => {
+		return balance ? Number(formatEther(balance)).toFixed(4) : "0.0000";
+	};
+
+	const canBidWithToken = (token: "ETH" | "WETH") => {
+		const balance = token === "ETH" ? ethBalance?.value : wethBalance?.value;
+		return balance !== undefined && balance >= BigInt(loanAmount);
 	};
 
 	return (
-		<Card>
-			<CardContent className="space-y-6">
-				<div className="space-y-2">
-					<Label>Token</Label>
-					<div className="flex items-center space-x-2">
-						<Switch
-							checked={useWETH}
-							onCheckedChange={setUseWETH}
-							id="weth-switch"
-						/>
-						<Label htmlFor="weth-switch">Use WETH</Label>
-					</div>
-					<p className="text-sm text-muted-foreground">
-						Balance:{" "}
-						{formatEther(
-							useWETH ? wethBalance?.value || 0n : ethBalance?.value || 0n,
-						)}{" "}
-						{useWETH ? "WETH" : "ETH"}
-					</p>
+		<div className="w-full mx-auto">
+			<div className="space-y-6">
+				<div className="space-y-4">
+					<Label className="text-base font-medium flex items-center justify-between">
+						Proposed Interest Rate
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger>
+									<Info className="w-4 h-4 text-muted-foreground" />
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Select your proposed interest rate for this loan</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</Label>
+					<Controller
+						name="interestRate"
+						control={control}
+						render={({ field }) => (
+							<RadioGroup
+								onValueChange={field.onChange}
+								value={field.value}
+								className="flex flex-row flex-wrap gap-4">
+								{presetInterestRates.map((rate) => (
+									<div key={rate.value}>
+										<RadioGroupItem
+											value={rate.value}
+											id={`rate-${rate.value}`}
+											className="peer sr-only"
+										/>
+										<Label
+											htmlFor={`rate-${rate.value}`}
+											className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+											{rate.label}
+										</Label>
+									</div>
+								))}
+								<div>
+									<RadioGroupItem
+										value="custom"
+										id="rate-custom"
+										className="peer sr-only"
+									/>
+									<Label
+										htmlFor="rate-custom"
+										className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+										Custom
+									</Label>
+								</div>
+							</RadioGroup>
+						)}
+					/>
 				</div>
 
-				<div className="space-y-2">
-					<Label>Interest Rate</Label>
-					<RadioGroup
-						value={interestRate}
-						onValueChange={setInterestRate}
-						className="grid grid-cols-2 gap-4">
-						{presetInterestRates.map((rate) => (
-							<div key={rate.value}>
-								<RadioGroupItem
-									value={rate.value}
-									id={`rate-${rate.value}`}
-									className="peer sr-only"
-									disabled={useCustomRate}
+				{interestRate === "custom" && (
+					<div className="space-y-4">
+						<Controller
+							name="interestRate"
+							control={control}
+							render={({ field }) => (
+								<Slider
+									min={10000}
+									max={20000}
+									step={100}
+									value={[Number(field.value)]}
+									onValueChange={(value) => field.onChange(value[0].toString())}
+									className="my-6"
 								/>
-								<Label
-									htmlFor={`rate-${rate.value}`}
-									className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-									{rate.label}
-								</Label>
-							</div>
-						))}
-					</RadioGroup>
+							)}
+						/>
+						<div className="flex justify-between text-sm text-muted-foreground">
+							<span>100%</span>
+							<span>200%</span>
+						</div>
+					</div>
+				)}
+
+				<div className="bg-primary/10 p-4 rounded-lg text-center">
+					<h3 className="text-sm mb-2">Selected Interest Rate</h3>
+					<div className="text-2xl font-bold text-primary flex items-center justify-center">
+						{formatInterestRate(interestRate)}
+					</div>
 				</div>
 
 				<div className="space-y-2">
-					<div className="flex items-center space-x-2 mb-6">
-						<Switch
-							checked={useCustomRate}
-							onCheckedChange={setUseCustomRate}
-							id="custom-rate-switch"
-						/>
-						<Label htmlFor="custom-rate-switch">Use custom rate</Label>
-					</div>
-					{useCustomRate && (
-						<div className="space-y-2 my-3">
-							<Slider
-								min={10000}
-								max={20000}
-								step={100}
-								value={[Number(customRate) || 10000]}
-								onValueChange={(value) => setInterestRate(value[0].toString())}
-							/>
-							<div className="flex justify-between">
-								<span>100%</span>
-								<span>200%</span>
+					<Label className="text-base font-medium flex items-center justify-between">
+						Select Lending Currency
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger>
+									<Info className="w-4 h-4 text-muted-foreground" />
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Choose the currency you want to lend with</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</Label>
+					<Controller
+						name="selectedToken"
+						control={control}
+						render={({ field }) => (
+							<div className="grid grid-cols-2 gap-4">
+								{["ETH", "WETH"].map((token) => (
+									<Button
+										key={token}
+										variant={field.value === token ? "default" : "outline"}
+										className="w-full h-auto py-2 px-4 flex flex-col items-center justify-center"
+										onClick={() => field.onChange(token)}
+										disabled={!canBidWithToken(token as "ETH" | "WETH")}>
+										<Coins className="w-5 h-5 mb-1" />
+										<span className="font-medium">{token}</span>
+										<span className="text-sm text-muted-foreground">
+											{formatBalance(
+												token === "ETH"
+													? ethBalance?.value
+													: wethBalance?.value,
+											)}{" "}
+											{token}
+										</span>
+									</Button>
+								))}
 							</div>
-						</div>
-					)}
+						)}
+					/>
 				</div>
-
-				{isHighInterest && (
-					<p className="text-yellow-500">
-						Warning: High interest rates may be less likely to be accepted by
-						borrowers.
-					</p>
-				)}
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }

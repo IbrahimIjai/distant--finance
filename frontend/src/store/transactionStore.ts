@@ -10,16 +10,18 @@ export enum TransactionType {
 
 type TransactionArgs =
 	| [string] // for CANCEL_LOAN, ACCEPT_BID, CANCEL_BID (loanId)
-	| [string, string] // for LEND (loanId, amount)
-	| [string, string]; // for BID (loanId, proposedInterest)
+	| [string, bigint] // for LEND (loanId, amount)
+	| [number, string]; // for BID (loanId, proposedInterest)
 
 interface TransactionState {
 	isOpen: boolean;
+	isReady: boolean;
 	type: TransactionType | null;
 	args: TransactionArgs;
 	contractAddress: Address | null;
 	abi: Abi | null;
 	functionName: string | null;
+	value: string | null;
 	setTransaction: (
 		params: Partial<
 			Omit<TransactionState, "setTransaction" | "resetTransaction">
@@ -30,15 +32,18 @@ interface TransactionState {
 
 export const useTransactionStore = create<TransactionState>((set) => ({
 	isOpen: false,
+	isReady: false,
 	type: null,
-	args: [""],
+	args: [""], // Default to an empty string array
 	contractAddress: null,
 	abi: null,
+	value: null,
 	functionName: null,
 	setTransaction: (params) => set((state) => ({ ...state, ...params })),
 	resetTransaction: () =>
 		set({
 			isOpen: false,
+			isReady: false,
 			type: null,
 			args: [""],
 			contractAddress: null,

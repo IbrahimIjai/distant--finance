@@ -22,6 +22,7 @@ interface TransactionDialogProps {
 	title: string;
 	description: string;
 	trxTitle: TrxTitle;
+	confirmButtonText?: string;
 }
 
 export function TransactionDialog({
@@ -30,13 +31,16 @@ export function TransactionDialog({
 	title,
 	trxTitle,
 	description,
+	confirmButtonText,
 }: TransactionDialogProps) {
 	const {
 		isOpen,
+		isReady,
 		args,
 		contractAddress,
 		abi,
 		functionName,
+		value,
 		setTransaction,
 		resetTransaction,
 	} = useTransactionStore();
@@ -57,7 +61,10 @@ export function TransactionDialog({
 		args,
 		abi: abi!,
 		contractAddress: contractAddress!,
+		value: BigInt(value ?? "0"),
 	});
+
+	console.log({ WriteContractError, WaitForTransactionReceiptError });
 
 	const handleConfirm = () => {
 		write();
@@ -86,9 +93,12 @@ export function TransactionDialog({
 	return (
 		<Dialog
 			open={isOpen}
-			onOpenChange={(open) => setTransaction({ isOpen: open })}>
+			onOpenChange={(open) => {
+				setTransaction({ isOpen: open });
+				reset();
+			}}>
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
@@ -124,11 +134,11 @@ export function TransactionDialog({
 								Retry
 							</Button>
 						</>
-					) : (
+					) : isReady ? (
 						<Button onClick={handleConfirm} className="w-full">
-							Confirm Transaction
+							{confirmButtonText ?? "Confirm Transaction"}
 						</Button>
-					)}
+					) : null}
 				</div>
 			</DialogContent>
 		</Dialog>

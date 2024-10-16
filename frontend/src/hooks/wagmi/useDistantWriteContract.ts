@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 
 export type TrxTitle =
 	| "Creating Approval for all Tokens in the selected collection"
-	| "Opening Loan Contract" | "Placing a bid...";
+	| "Opening Loan Contract"
+	| "Placing a bid...";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,
@@ -13,12 +14,14 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	args,
 	abi,
 	contractAddress,
+	value,
 }: {
 	fn: string;
 	trxTitle: TrxTitle;
 	args: TArgs;
 	abi: Abi;
 	contractAddress: Address;
+	value?: bigint;
 }) => {
 	const { toast } = useToast();
 
@@ -57,6 +60,7 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 			abi,
 			functionName: fn,
 			args,
+			value,
 		});
 
 	const showToast = (

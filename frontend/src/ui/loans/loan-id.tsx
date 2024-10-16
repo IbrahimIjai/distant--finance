@@ -65,10 +65,10 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 				<div className="flex flex-col-reverse items-start lg:flex-row  w-full gap-6">
 					<BidsTable
 						bids={bids}
-						loanId={data?.loanContract.amount}
+						loanId={data?.loanContract.id}
 						amount={data?.loanContract.amount ??"0"}
 						loading={isLoading}
-						borrower={data?.loanContract.borrower as Address}
+						borrower={data?.loanContract.borrower.id as Address}
 					/>
 					<LoanBox
 						loan={{
