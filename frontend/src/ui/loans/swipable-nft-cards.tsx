@@ -38,31 +38,32 @@ function NFTCard({ children, onSendToBack }: NFTCardProps) {
     }
   }
 
-  return (
-    <motion.div
-      className="absolute h-64 w-64 cursor-grab"
-      style={{ x, y, rotateX, rotateY }}
-      drag
-      dragConstraints={{ top: 0, right: 0, bottom: 0, left: 0 }}
-      dragElastic={0.6}
-      whileTap={{ cursor: "grabbing" }}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-    </motion.div>
-  );
+	return (
+		<motion.div
+			className="absolute h-64 md:h-80 w-4/5 lg:w-72 cursor-grab"
+			style={{ x, y, rotateX, rotateY }}
+			drag
+			dragConstraints={{ top: 0, right: 0, bottom: 0, left: 0 }}
+			dragElastic={0.6}
+			whileTap={{ cursor: "grabbing" }}
+			onDragEnd={handleDragEnd}>
+			{children}
+		</motion.div>
+	);
 }
 
 interface NFTSwipeableCardsProps {
-  collectionAddress: Address;
-  nftIds: number[];
+	collectionAddress: Address;
+	isSubgraphdataLoading: boolean;
+	nftIds: number[];
 }
 
 type TokenDetailType = { raribleDetails: RaribleTokenDetails } | undefined;
 
 export default function NFTSwipeableCards({
-  collectionAddress,
-  nftIds,
+	collectionAddress,
+	isSubgraphdataLoading,
+	nftIds,
 }: NFTSwipeableCardsProps) {
   const {
     data: tokenDetails,
@@ -99,53 +100,53 @@ export default function NFTSwipeableCards({
     });
   };
 
-  if (isLoading) {
-    return <Skeleton className="h-72 w-60 rounded-lg" />;
-  }
+	if (isLoading || isSubgraphdataLoading) {
+		return <Skeleton className="h-72 w-60 rounded-lg" />;
+	}
 
   if (isError) {
     return <div>Error loading NFT details</div>;
   }
 
-  return (
-    <div className="relative h-64 w-64" style={{ perspective: 600 }}>
-      {cards.map((card, index) => (
-        <NFTCard key={card.id} onSendToBack={() => sendToBack(card.id)}>
-          <motion.div
-            className="h-full w-full rounded-lg shadow-lg"
-            animate={{
-              rotateZ: (cards.length - index - 1) * 2,
-              scale: 1 - index * 0.05,
-              zIndex: cards.length - index,
-            }}
-            initial={false}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <Card className="h-full w-full overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-700">
-              <CardContent className="p-0 h-full relative">
-                <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
-                <img
-                  src={card.imageUrl}
-                  alt={card.name}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute top-0 left-0 right-0 p-3 z-20">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs font-semibold mb-1"
-                  >
-                    {/* {card.collectionName} */}
-                    {card.name}
-                  </Badge>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 z-20">
-                  <p className="text-white text-2xl font-bold">#{card.id}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </NFTCard>
-      ))}
-    </div>
-  );
+	return (
+		<div
+			className="relative h-64 md:h-80 lg:w-64 w-full flex items-start justify-center"
+			style={{ perspective: 600 }}>
+			{cards.map((card, index) => (
+				<NFTCard key={card.id} onSendToBack={() => sendToBack(card.id)}>
+					<motion.div
+						className="h-full w-full rounded-lg shadow-lg"
+						animate={{
+							rotateZ: (cards.length - index - 1) * 2,
+							scale: 1 - index * 0.05,
+							zIndex: cards.length - index,
+						}}
+						initial={false}
+						transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+						<Card className="h-full w-full overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-700">
+							<CardContent className="p-0 h-full relative">
+								<div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+								<img
+									src={card.imageUrl}
+									alt={card.name}
+									className="h-full w-full object-cover"
+								/>
+								<div className="absolute top-0 left-0 right-0 p-3 z-20">
+									<Badge
+										variant="secondary"
+										className="text-xs font-semibold mb-1">
+										{/* {card.collectionName} */}
+										{card.name}
+									</Badge>
+								</div>
+								<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 z-20">
+									<p className="text-white text-2xl font-bold">#{card.id}</p>
+								</div>
+							</CardContent>
+						</Card>
+					</motion.div>
+				</NFTCard>
+			))}
+		</div>
+	);
 }
