@@ -1,61 +1,135 @@
-import { Button } from "@/components/ui/button";
+import React, { ReactNode } from "react";
+import { useTransactionStore } from "@/store/transactionStore";
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogHeader,
 	DialogTitle,
+	DialogDescription,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import confetti from "canvas-confetti";
+import {
+	TrxTitle,
+	useDistantWriteContract,
+} from "@/hooks/wagmi/useDistantWriteContract";
 
-enum TransactionType {
-	CANCEL_LOAN = "CLOSE_CONTRACT",
-
-	LEND = "LEND",
-
-	BID = "BID",
-	CANCEL_BID = "CANCEL_BID",
+interface TransactionDialogProps {
+	children: ReactNode;
+	trigger: ReactNode;
+	title: string;
+	description: string;
+	trxTitle: TrxTitle;
 }
-export function TransactionDialog() {
+
+export function TransactionDialog({
+	children,
+	trigger,
+	title,
+	trxTitle,
+	description,
+}: TransactionDialogProps) {
+	const {
+		isOpen,
+		args,
+		contractAddress,
+		abi,
+		functionName,
+		setTransaction,
+		resetTransaction,
+	} = useTransactionStore();
+
+	const {
+		write,
+		isPending,
+		isConfirming,
+		isConfirmed,
+		isWriteContractError,
+		isWaitTrxError,
+		reset,
+		WriteContractError,
+		WaitForTransactionReceiptError,
+	} = useDistantWriteContract({
+		fn: functionName!,
+		trxTitle: trxTitle,
+		args,
+		abi: abi!,
+		contractAddress: contractAddress!,
+	});
+
+	const handleConfirm = () => {
+		write();
+	};
+
+	const handleClose = () => {
+		resetTransaction();
+		reset();
+	};
+
+	const handleRetry = () => {
+		reset();
+		write();
+	};
+
+	React.useEffect(() => {
+		if (isConfirmed) {
+			confetti({
+				particleCount: 100,
+				spread: 70,
+				origin: { y: 0.6 },
+			});
+		}
+	}, [isConfirmed]);
+
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="outline">Edit Profile</Button>
-			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => setTransaction({ isOpen: open })}>
+			<DialogTrigger asChild>{trigger}</DialogTrigger>
+			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit profile</DialogTitle>
-					<DialogDescription>
-						Make changes to your profile here. Click save when youre done.
-					</DialogDescription>
+					<DialogTitle>{title}</DialogTitle>
+					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
-				<div className="grid gap-4 py-4">
-					<div className="grid grid-cols-4 items-center gap-4">
-						<Label htmlFor="name" className="text-right">
-							Name
-						</Label>
-						<Input
-							id="name"
-							defaultValue="Pedro Duarte"
-							className="col-span-3"
-						/>
-					</div>
-					<div className="grid grid-cols-4 items-center gap-4">
-						<Label htmlFor="username" className="text-right">
-							Username
-						</Label>
-						<Input
-							id="username"
-							defaultValue="@peduarte"
-							className="col-span-3"
-						/>
-					</div>
+
+				{children}
+
+				<div className="mt-6">
+					{isPending || isConfirming ? (
+						<Button disabled className="w-full">
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Processing
+						</Button>
+					) : isConfirmed ? (
+						<Button
+							onClick={handleClose}
+							className="w-full bg-green-500 hover:bg-green-600">
+							<CheckCircle2 className="mr-2 h-4 w-4" />
+							Done
+						</Button>
+					) : isWriteContractError || isWaitTrxError ? (
+						<>
+							<p className="text-red-500 text-sm mb-2">
+								{WriteContractError?.message ||
+									WaitForTransactionReceiptError?.message ||
+									"An error occurred"}
+							</p>
+							<Button
+								onClick={handleRetry}
+								variant="destructive"
+								className="w-full">
+								<XCircle className="mr-2 h-4 w-4" />
+								Retry
+							</Button>
+						</>
+					) : (
+						<Button onClick={handleConfirm} className="w-full">
+							Confirm Transaction
+						</Button>
+					)}
 				</div>
-				<DialogFooter>
-					<Button type="submit">Save changes</Button>
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

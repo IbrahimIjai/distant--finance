@@ -93,7 +93,7 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 	};
 
 	return (
-		<Card className="w-full max-w-md">
+		<Card className="w-full lg:w-2/5">
 			<CardHeader>
 				<CardTitle className="flex justify-between items-center">
 					<span>Loan Details</span>

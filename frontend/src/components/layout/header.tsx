@@ -44,7 +44,7 @@ export default function Header() {
 	const pathname = usePathname();
 	// const isDesktop = useMediaQuery("(min-width: 900px)");
 	return (
-		<div className="fixed bg-background/40 backdrop-blur-lg px-6 py-4 top-0 inset-x-0 w-full flex justify-between items-center">
+		<div className="fixed z-20 bg-background border-b backdrop-blur-lg px-6 py-4 top-0 inset-x-0 w-full flex justify-between items-center">
 			<Logo />
 
 			<div className=" gap-[2rem] hidden lg:flex">
@@ -62,7 +62,7 @@ export default function Header() {
 					</Link>
 				))}
 			</div>
-			<div className="flex items-center">
+			<div className="lg:flex items-center hidden">
 				<CustomConnectButton />
 			</div>
 

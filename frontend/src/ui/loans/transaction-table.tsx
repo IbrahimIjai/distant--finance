@@ -82,7 +82,7 @@ export default function TransactionTable() {
 	return (
 		<div className="p-4 space-y-4 border bg-card rounded-lg">
 			<div className="flex justify-between items-center">
-				<h2 className="text-2xl font-bold">Transactions</h2>
+				<h2 className="text-xl font-bold">Transactions</h2>
 				<div className="flex space-x-2">
 					<Select onValueChange={(value) => setFilter(value)}>
 						<SelectTrigger className="w-[180px]">

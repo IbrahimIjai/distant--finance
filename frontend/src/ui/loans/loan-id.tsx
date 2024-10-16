@@ -18,24 +18,29 @@ import { LoanStatus } from "@/lib/types";
 import NFTSwipeableCards from "./swipable-nft-cards";
 import { LoanBox } from "./loan-box";
 import TransactionTable from "./transaction-table";
+import { Bid, BidsTable } from "./bids";
 
 const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 	const { data, loading } = useQuery(GET_LOAN, {
 		variables: { ID: id.toLowerCase() },
 	});
 
-	console.log({ data });
+	const bids: Bid[] = data?.loanContract.bids ?? [];
+
+	console.log({ data, bids });
+
 	const { tokenDetails } = useLoanTokens(id as Address);
+
+	console.log({ id: data?.loanContract.id }, typeof data?.loanContract.id);
 	const handleLoanAction = (action: string) => {
 		console.log(`Action: ${action}`);
-		// setModal(ModalType[action.toUpperCase() as keyof typeof ModalType]);
 	};
 	const isLoading = loading;
 	// const isError = error;
 
 	return (
 		<div className="container mx-auto p-4">
-			<div className="container">
+			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center mb-6">
 					<Link
 						href="/loans"
@@ -49,26 +54,33 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 					/>
 				</div>
 
-				<div className="header-container">
-					<NFTSwipeableCards
-						collectionAddress={data?.loanContract.lockId.collection.id}
-						nftIds={tokenDetails}
+				<NFTSwipeableCards
+					collectionAddress={data?.loanContract.lockId.collection.id}
+					isSubgraphdataLoading={loading}
+					nftIds={tokenDetails}
+				/>
+				<div className="flex flex-col-reverse items-start lg:flex-row  w-full gap-6">
+					<BidsTable
+						bids={bids}
+						loanId={data?.loanContract.id ?? ""}
+						amount={data?.loanContract.amount ?? "0"}
+						loading={isLoading}
+						borrower={data?.loanContract.borrower as Address}
 					/>
-					<aside className="flex flex-col gap-2 items-end w-full">
-						<LoanBox
-							loan={{
-								id: data?.loanContract.id as string,
-								amount: data?.loanContract.amount as string,
-								interest: data?.loanContract.interest as number,
-								expiry: data?.loanContract.expiry,
-								borrower: data?.loanContract.borrower,
-								lender: data?.loanContract.lender,
-								status: data?.loanContract.status as LoanStatus,
-							}}
-							onAction={handleLoanAction}
-						/>
-					</aside>
+					<LoanBox
+						loan={{
+							id: data?.loanContract.id as string,
+							amount: data?.loanContract.amount as string,
+							interest: data?.loanContract.interest as number,
+							expiry: data?.loanContract.expiry,
+							borrower: data?.loanContract.borrower,
+							lender: data?.loanContract.lender,
+							status: data?.loanContract.status as LoanStatus,
+						}}
+						onAction={handleLoanAction}
+					/>
 				</div>
+
 				<TransactionTable />
 			</div>
 		</div>
@@ -159,3 +171,15 @@ const LoanStatusComponent: React.FC<LoanStatusProps> = ({
 };
 
 export default LoanIdComponent;
+
+// const { data: loandataFromWagmi } = useReadContract({
+// 	address: P2PLENDING,
+// 	abi: P2PLENDING_ABI,
+// 	functionName: "getLoanData",
+// 	args: [id as Address],
+// });
+
+// console.log({ loandataFromWagmi });
+
+// const lender = loandataFromWagmi && loandataFromWagmi[1];
+// const isLender = address && lender && address === lender;

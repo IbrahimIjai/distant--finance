@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
@@ -40,7 +40,7 @@ function NFTCard({ children, onSendToBack }: NFTCardProps) {
 
 	return (
 		<motion.div
-			className="absolute h-64 w-64 cursor-grab"
+			className="absolute h-64 md:h-80 w-4/5 lg:w-72 cursor-grab"
 			style={{ x, y, rotateX, rotateY }}
 			drag
 			dragConstraints={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -54,6 +54,7 @@ function NFTCard({ children, onSendToBack }: NFTCardProps) {
 
 interface NFTSwipeableCardsProps {
 	collectionAddress: Address;
+	isSubgraphdataLoading: boolean;
 	nftIds: number[];
 }
 
@@ -61,6 +62,7 @@ type TokenDetailType = { raribleDetails: RaribleTokenDetails } | undefined;
 
 export default function NFTSwipeableCards({
 	collectionAddress,
+	isSubgraphdataLoading,
 	nftIds,
 }: NFTSwipeableCardsProps) {
 	const {
@@ -98,7 +100,7 @@ export default function NFTSwipeableCards({
 		});
 	};
 
-	if (isLoading) {
+	if (isLoading || isSubgraphdataLoading) {
 		return <Skeleton className="h-72 w-60 rounded-lg" />;
 	}
 
@@ -107,7 +109,9 @@ export default function NFTSwipeableCards({
 	}
 
 	return (
-		<div className="relative h-64 w-64" style={{ perspective: 600 }}>
+		<div
+			className="relative h-64 md:h-80 lg:w-64 w-full flex items-start justify-center"
+			style={{ perspective: 600 }}>
 			{cards.map((card, index) => (
 				<NFTCard key={card.id} onSendToBack={() => sendToBack(card.id)}>
 					<motion.div
@@ -138,7 +142,6 @@ export default function NFTSwipeableCards({
 								<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 z-20">
 									<p className="text-white text-2xl font-bold">#{card.id}</p>
 								</div>
-								
 							</CardContent>
 						</Card>
 					</motion.div>
