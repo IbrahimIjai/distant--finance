@@ -3,10 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AlertCircle, MoveLeft } from "lucide-react";
 import { useQuery } from "@apollo/client";
@@ -21,9 +21,9 @@ import TransactionTable from "./transaction-table";
 import { Bid, BidsTable } from "./bids";
 
 const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
-	const { data, loading } = useQuery(GET_LOAN, {
-		variables: { ID: id.toLowerCase() },
-	});
+  const { data, loading } = useQuery(GET_LOAN, {
+    variables: { ID: id.toLowerCase() },
+  });
 
 	const bids: Bid[] = data?.loanContract.bids ?? [];
 
@@ -91,86 +91,88 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 };
 
 interface StatusInfo {
-	color: string;
-	tooltipContent: string;
+  color: string;
+  tooltipContent: string;
 }
 
 function getStatusInfo(status: LoanStatus): StatusInfo {
-	switch (status) {
-		case LoanStatus.ACTIVE:
-			return {
-				color: "#00cc66",
-				tooltipContent:
-					"Loan is active. A lender has been found and the loan is ongoing.",
-			};
-		case LoanStatus.CLOSED:
-			return {
-				color: "#808080",
-				tooltipContent: "Loan is closed. It has been completed or terminated.",
-			};
-		case LoanStatus.LIQUIDATED:
-			return {
-				color: "#ff0000",
-				tooltipContent:
-					"Loan has been liquidated. The borrower failed to repay within the specified time.",
-			};
-		case LoanStatus.PENDING:
-			return {
-				color: "#ffff00",
-				tooltipContent:
-					"Loan is pending. Waiting for a lender to fund the loan.",
-			};
-		case LoanStatus.LOAN_REPAID:
-			return {
-				color: "#2fc0db",
-				tooltipContent:
-					"Loan has been repaid. The borrower has successfully repaid the loan.",
-			};
-		default:
-			return {
-				color: "#000000",
-				tooltipContent: "Unknown loan status.",
-			};
-	}
+  switch (status) {
+    case LoanStatus.ACTIVE:
+      return {
+        color: "#00cc66",
+        tooltipContent:
+          "Loan is active. A lender has been found and the loan is ongoing.",
+      };
+    case LoanStatus.CLOSED:
+      return {
+        color: "#808080",
+        tooltipContent: "Loan is closed. It has been completed or terminated.",
+      };
+    case LoanStatus.LIQUIDATED:
+      return {
+        color: "#ff0000",
+        tooltipContent:
+          "Loan has been liquidated. The borrower failed to repay within the specified time.",
+      };
+    case LoanStatus.PENDING:
+      return {
+        color: "#ffff00",
+        tooltipContent:
+          "Loan is pending. Waiting for a lender to fund the loan.",
+      };
+    case LoanStatus.LOAN_REPAID:
+      return {
+        color: "#2fc0db",
+        tooltipContent:
+          "Loan has been repaid. The borrower has successfully repaid the loan.",
+      };
+    default:
+      return {
+        color: "#000000",
+        tooltipContent: "Unknown loan status.",
+      };
+  }
 }
 
 interface LoanStatusProps {
-	status: LoanStatus;
-	loading: boolean;
+  status: LoanStatus;
+  loading: boolean;
 }
 
 const LoanStatusComponent: React.FC<LoanStatusProps> = ({
-	status,
-	loading,
+  status,
+  loading,
 }) => {
-	const { color, tooltipContent } = getStatusInfo(status);
+  const { color, tooltipContent } = getStatusInfo(status);
 
-	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<div className="flex items-center">
-						{loading ? (
-							<Skeleton className="w-16 h-6" />
-						) : (
-							<span
-								className="mr-2 text-sm font-semibold flex items-center"
-								style={{ color: color }}>
-								<span
-									className="w-[10px] h-[10px] rounded-full inline-block mr-2"
-									style={{ background: color }}></span>
-								Status: {status}
-							</span>
-						)}
-						<AlertCircle size={16} />
-					</div>
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{tooltipContent}</p>
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-	);
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center">
+            {loading ? (
+              <Skeleton className="w-16 h-6" />
+            ) : (
+              <span
+                className="mr-2 text-sm font-semibold flex items-center"
+                style={{ color: color }}
+              >
+                <span
+                  className="w-[10px] h-[10px] rounded-full inline-block mr-2"
+                  style={{ background: color }}
+                ></span>
+                Status: {status}
+              </span>
+            )}
+            <AlertCircle size={16} />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltipContent}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 };
 
 export default LoanIdComponent;
