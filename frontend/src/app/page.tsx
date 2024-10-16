@@ -5,14 +5,13 @@ import ClickLinks from "@/ui/landing/links";
 import TopCollections from "@/ui/landing/top-collection";
 
 export default function Home() {
-	return (
-		<>
-			<Heros />
-			<ProtocolStats />
-			<Ads />
-			<ClickLinks />
-			<TopCollections />
-			
-		</>
-	);
+  return (
+    <>
+      <Heros />
+      <ProtocolStats />
+      <Ads />
+      <ClickLinks />
+      <TopCollections />
+    </>
+  );
 }
