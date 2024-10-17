@@ -14,21 +14,13 @@ import {
 	CardHeader,
 } from "@/components/ui/card";
 import { formatEther } from "viem";
+import { Loan } from "./activity-tabs";
 
-interface ActiveLoan {
-	amount: bigint;
-	borrower: string;
-	expiry: bigint;
-	id: string;
-	interest: bigint;
-	lender: string;
-	lockId: string;
-}
 export function LoanCard({
 	loan,
 	type,
 }: {
-	loan: ActiveLoan;
+	loan: Loan;
 	type: "active" | "pending";
 }) {
 	const { address } = useAccount();

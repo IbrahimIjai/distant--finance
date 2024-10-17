@@ -7,7 +7,8 @@ export type TrxTitle =
 	| "Creating Approval for all Tokens in the selected collection"
 	| "Opening Loan Contract"
 	| "Placing a bid..."
-	| "Lending...";
+	| "Lending..."
+	| "Claiming all lost bids...";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,

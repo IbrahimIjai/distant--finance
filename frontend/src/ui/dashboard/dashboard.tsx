@@ -6,9 +6,12 @@ import { useAccount } from "wagmi";
 import DashboardAction from "./dashboard-action";
 import Overview from "./overview-root";
 import { TabsContainer } from "./activity-section/activity-tabs";
+import { useQuery } from "@apollo/client";
+import { GET_ACCOUNT } from "@/lib/gql-queries";
+import { RecentTransactions } from "./user-transactions-history";
 
 export default function DashboardMain() {
-	const { isConnected } = useAccount();
+	const { isConnected, address } = useAccount();
 	return (
 		<div className="w-full max-w-7xl mx-auto px-5 min-h-screen pt-24 flex flex-col items-center justify-center ">
 			{isConnected ? (
@@ -19,6 +22,7 @@ export default function DashboardMain() {
 					</div>
 
 					<TabsContainer />
+					<RecentTransactions />
 				</div>
 			) : (
 				<div className="flex flex-col text-center border  border-primary/30 rounded-lg p-32 items-center gap-6 justify-center">

@@ -5,6 +5,7 @@ export enum TransactionType {
 	LEND = "LEND",
 	BID = "BID",
 	ACCEPT_BID = "ACCEPT_BID",
+	CLAIM_LOST_BID = "CLAIM_LOST_BID",
 	CANCEL_BID = "CANCEL_BID",
 }
 
