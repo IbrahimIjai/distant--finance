@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ExternalLink } from "lucide-react";
-import { slice } from "@/lib/utils";
 import Link from "next/link";
 
 export interface Loan {
@@ -62,14 +61,16 @@ export function TabsContainer() {
 	const allLoans: Loan[] = useMemo(() => {
 		if (!data?.account) return [];
 		return [...(data.account.borrows || []), ...(data.account.lends || [])].map(
-			(loan) => ({
-				...loan,
-				amount: BigInt(loan.amount),
-				expiry: BigInt(loan.expiry),
-				interest: BigInt(loan.interest),
-				lender: loan.lends ? loan.lends.id : zeroAddress,
-				borrower: loan?.borrower.id,
-			}),
+			(loan) => {
+				return {
+					...loan,
+					amount: BigInt(loan.amount),
+					expiry: BigInt(loan.expiry),
+					interest: BigInt(loan.interest),
+					lender: loan.lender.id,
+					borrower: loan?.borrower.id,
+				};
+			},
 		);
 	}, [data]);
 
@@ -141,6 +142,7 @@ export function TabsContainer() {
 		</div>
 	);
 
+	console.log({ activeLoans: activeLoans });
 	const renderLoans = (loans: Loan[], type: "active" | "pending") => (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 			{loans.map((loan) => (

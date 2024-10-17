@@ -26,7 +26,7 @@ export function LoanCard({
 	const { address } = useAccount();
 	const { push } = useRouter();
 	const isLender = loan.lender.toLowerCase() === address?.toLowerCase();
-
+	console.log({ lender: loan.lender, address, isLender });
 	return (
 		<Card
 			className="w-full cursor-pointer hover:shadow-md transition-shadow"

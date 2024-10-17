@@ -64,9 +64,16 @@ export const GET_LOAN = gql`
 			}
 			bids {
 				proposedInterest
+				status
 				bidder {
 					id
 				}
+			}
+			transactions {
+				txType
+				transactionFrom
+				timestamp
+				id
 			}
 		}
 	}

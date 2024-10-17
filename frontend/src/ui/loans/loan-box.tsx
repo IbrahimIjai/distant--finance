@@ -37,7 +37,6 @@ interface LoanBoxProps {
 export function LoanBox({ loan, onAction }: LoanBoxProps) {
 	const { address } = useAccount();
 	const { amount, interest, expiry, borrower, lender, status } = loan;
-	console.log({ loan });
 	const formattedAmount = amount && formatEther(BigInt(amount));
 	const formattedInterest = interest / 100; // Assuming interest is in basis points
 	const expiryDate = new Date(parseInt(expiry) * 1000);
@@ -98,7 +97,7 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 	};
 
 	return (
-		<Card className="w-full max-w-md">
+		<Card className="w-full lg:max-w-md">
 			<CardHeader>
 				<CardTitle className="flex justify-between items-center">
 					<span>Loan Details</span>

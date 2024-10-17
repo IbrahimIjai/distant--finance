@@ -23,9 +23,11 @@ import { InboxIcon, HelpCircle } from "lucide-react";
 import { TransactionDialog } from "../transaction-dialog/transaction";
 import { BidComponent } from "../transaction-dialog/bid-content";
 import { P2PLENDING } from "@/config";
+import { slice } from "@/lib/utils";
 
 export interface Bid {
 	proposedInterest: bigint;
+	status: string;
 	bidder: {
 		id: string;
 	};
@@ -47,6 +49,8 @@ export function BidsTable({
 	loanId,
 }: BidsTableProps) {
 	const { address } = useAccount();
+
+	console.log({ bids });
 
 	if (loading) {
 		return <BidsTableSkeleton />;
@@ -117,13 +121,19 @@ export function BidsTable({
 					) : (
 						bids.map((bid, index) => (
 							<TableRow key={index}>
-								<TableCell>{bid.bidder.id}</TableCell>
-								<TableCell>{formatEther(bid.proposedInterest)}%</TableCell>
+								<TableCell>{slice(bid.bidder.id)}</TableCell>
+								<TableCell>{Number(bid.proposedInterest) / 100}%</TableCell>
 								<TableCell>
 									{address?.toLowerCase() === borrower.toLowerCase() ? (
 										<Button onClick={() => {}}>Accept Bid</Button>
 									) : address?.toLowerCase() === bid.bidder.id.toLowerCase() ? (
-										<Button onClick={() => {}}>Claim Bid</Button>
+										<>
+											{bid.status === "ACCEPTED" ? (
+												<p className="text-muted-foreground">Bid Accepted</p>
+											) : (
+												<Button onClick={() => {}}>Claim Bid</Button>
+											)}
+										</>
 									) : null}
 								</TableCell>
 							</TableRow>

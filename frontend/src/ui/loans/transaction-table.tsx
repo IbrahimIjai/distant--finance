@@ -1,128 +1,173 @@
 import React, { useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { slice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAccount } from "wagmi";
+
+enum TransactionType {
+	TRANSFER = "TRANSFER",
+	LOAN_REQUEST_OPEN = "LOAN_REQUEST_OPEN",
+	LOAN_REQUEST_CANCELLED = "LOAN_REQUEST_CANCELLED",
+	LOAN_REQUEST_ACTIVE = "LOAN_REQUEST_ACTIVE",
+	LOAN_REQUEST_BID_OPEN = "LOAN_REQUEST_BID_OPEN",
+	LOAN_REQUEST_BID_CANCELLED = "LOAN_REQUEST_BID_CANCELLED",
+	LOAN_REQUEST_BID_LOST = "LOAN_REQUEST_BID_LOST",
+	LOAN_LIQUIDATED = "LOAN_LIQUIDATED",
+	LOAN_REPAID = "LOAN_REPAID",
+	TOKENS_LOCKED = "TOKENS_LOCKED",
+}
 
 type Transaction = {
-  id: string;
-  maker: string;
-  time: string;
-  type: "lend" | "bid" | "repay" | "default";
+	id: string;
+	transactionFrom: string;
+	timestamp: string;
+	txType: TransactionType;
 };
 
-const transactions: Transaction[] = [
-  {
-    id: "1",
-    maker: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-    time: "2024-03-15 10:30",
-    type: "lend",
-  },
-  {
-    id: "2",
-    maker: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-    time: "2024-03-15 11:45",
-    type: "bid",
-  },
-  {
-    id: "3",
-    maker: "0xdD2FD4581271e230360230F9337D5c0430Bf44C0",
-    time: "2024-03-15 13:20",
-    type: "repay",
-  },
-  {
-    id: "4",
-    maker: "0x2546BcD3c84621e976D8185a91A922aE77ECEc30",
-    time: "2024-03-15 14:55",
-    type: "default",
-  },
-  {
-    id: "5",
-    maker: "0xbDA5747bFD65F08deb54cb465eB87D40e51B197E",
-    time: "2024-03-15 16:10",
-    type: "lend",
-  },
-];
-
-const getBadgeStyles = (type: Transaction["type"]) => {
-  switch (type) {
-    case "lend":
-      return "bg-blue-100 text-blue-800";
-    case "bid":
-      return "bg-green-100 text-green-800";
-    case "repay":
-      return "bg-purple-100 text-purple-800";
-    case "default":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
+const getBadgeStyles = (type: TransactionType) => {
+	switch (type) {
+		case TransactionType.TRANSFER:
+			return "bg-blue-100 text-blue-800";
+		case TransactionType.LOAN_REQUEST_OPEN:
+		case TransactionType.LOAN_REQUEST_BID_OPEN:
+			return "bg-green-100 text-green-800";
+		case TransactionType.LOAN_REQUEST_CANCELLED:
+		case TransactionType.LOAN_REQUEST_BID_CANCELLED:
+		case TransactionType.LOAN_REQUEST_BID_LOST:
+			return "bg-yellow-100 text-yellow-800";
+		case TransactionType.LOAN_REQUEST_ACTIVE:
+			return "bg-purple-100 text-purple-800";
+		case TransactionType.LOAN_LIQUIDATED:
+			return "bg-red-100 text-red-800";
+		case TransactionType.LOAN_REPAID:
+			return "bg-teal-100 text-teal-800";
+		case TransactionType.TOKENS_LOCKED:
+			return "bg-indigo-100 text-indigo-800";
+		default:
+			return "bg-gray-100 text-gray-800";
+	}
+};
+const formatTransactionType = (type: TransactionType) => {
+	return type
+		.split("_")
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join(" ");
 };
 
-export default function TransactionTable() {
-  const [filter, setFilter] = useState<string>("all");
+const TableLoader = () => (
+	<>
+		{[...Array(5)].map((_, index) => (
+			<TableRow key={index}>
+				<TableCell>
+					<Skeleton className="h-6 w-24" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-6 w-32" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-6 w-24" />
+				</TableCell>
+			</TableRow>
+		))}
+	</>
+);
+export default function TransactionTable({
+	transactions,
+	isLoading,
+}: {
+	transactions: Transaction[];
+	isLoading: boolean;
+}) {
+	const { chain } = useAccount();
+	// console.log({ chainExplorer: chain?.blockExplorers?.default.url });
+	const [filter, setFilter] = useState<TransactionType | "all">("all");
 
-  const filteredTransactions = transactions.filter((tx) =>
-    filter === "all" ? true : tx.type === filter
-  );
+	const filteredTransactions = transactions?.filter((tx) =>
+		filter === "all" ? true : tx.txType === filter,
+	);
 
-  return (
-    <div className="p-4 space-y-4 border bg-card rounded-lg">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Transactions</h2>
-        <div className="flex space-x-2">
-          <Select onValueChange={(value) => setFilter(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="lend">Lend</SelectItem>
-              <SelectItem value="bid">Bid</SelectItem>
-              <SelectItem value="repay">Repay</SelectItem>
-              <SelectItem value="default">Default</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-muted-foreground">
-              Transaction Type
-            </TableHead>
-            <TableHead className="text-muted-foreground">Maker</TableHead>
+	const handleRowClick = (transactionId: string) => {
+		if (chain?.blockExplorers?.default?.url) {
+			window.open(
+				`${chain.blockExplorers.default.url}/tx/${transactionId}`,
+				"_blank",
+			);
+		} else {
+			console.warn("Block explorer URL not available for the current network");
+		}
+	};
 
-            <TableHead className="text-muted-foreground">Time</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTransactions.map((tx) => (
-            <TableRow key={tx.id} className="cursor-pointer">
-              <TableCell className="font-medium">
-                <Badge className={`${getBadgeStyles(tx.type)} capitalize`}>
-                  {tx.type}
-                </Badge>
-              </TableCell>
-              <TableCell className="font-medium">{slice(tx.maker)}</TableCell>
-              <TableCell>{tx.time}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+	return (
+		<div className="p-4 space-y-4 border bg-card rounded-lg">
+			<div className="flex justify-between items-center">
+				<h2 className="text-2xl font-bold">Transactions</h2>
+				<div className="flex space-x-2">
+					<Select
+						onValueChange={(value) =>
+							setFilter(value as TransactionType | "all")
+						}>
+						<SelectTrigger className="w-[220px]">
+							<SelectValue placeholder="Filter by transaction type" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Types</SelectItem>
+							{Object.values(TransactionType).map((type) => (
+								<SelectItem key={type} value={type}>
+									{formatTransactionType(type)}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+			</div>
+			<Table>
+				<TableHeader>
+					<TableRow>
+						<TableHead className="text-muted-foreground">Type</TableHead>
+						<TableHead className="text-muted-foreground">From</TableHead>
+						<TableHead className="text-muted-foreground">Time</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{isLoading ? (
+						<TableLoader />
+					) : (
+						filteredTransactions.map((tx) => (
+							<TableRow
+								key={tx.id}
+								className="hover:bg-muted/50 transition-colors cursor-pointer"
+								onClick={() => handleRowClick(tx.id)}>
+								<TableCell className="font-medium">
+									<Badge className={`${getBadgeStyles(tx.txType)} capitalize`}>
+										{formatTransactionType(tx.txType)}
+									</Badge>
+								</TableCell>
+								<TableCell className="font-medium">
+									{slice(tx.transactionFrom)}
+								</TableCell>
+								<TableCell>
+									{new Date(parseInt(tx.timestamp) * 1000).toLocaleString()}
+								</TableCell>
+							</TableRow>
+						))
+					)}
+				</TableBody>
+			</Table>
+		</div>
+	);
 }
