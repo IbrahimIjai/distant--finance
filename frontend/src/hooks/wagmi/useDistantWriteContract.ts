@@ -6,7 +6,8 @@ import { useEffect, useRef } from "react";
 export type TrxTitle =
 	| "Creating Approval for all Tokens in the selected collection"
 	| "Opening Loan Contract"
-	| "Placing a bid...";
+	| "Placing a bid..."
+	| "Lending...";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,
@@ -36,14 +37,14 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 		isPending,
 		isSuccess: isTrxSubmitted,
 		isError: isWriteContractError,
-		writeContractAsync,
+		writeContract,
 		error: WriteContractError,
 		reset,
 	} = useWriteContract();
-	console.log(
-		"isWriteContractError isWriteContractError",
-		isWriteContractError,
-	);
+	// console.log(
+	// 	"isWriteContractError isWriteContractError",
+	// 	isWriteContractError,
+	// );
 	const {
 		isLoading: isConfirming,
 		isSuccess: isConfirmed,
@@ -55,7 +56,7 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	});
 
 	const write = () =>
-		writeContractAsync({
+		writeContract({
 			address: contractAddress,
 			abi,
 			functionName: fn,

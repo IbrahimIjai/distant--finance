@@ -27,14 +27,14 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 
 	const bids: Bid[] = data?.loanContract.bids ?? [];
 
-	console.log({ data, bids });
+	// console.log({ data, bids });
 
 	const { tokenDetails } = useLoanTokens(id as Address);
 
-	console.log(
-		{ id: data?.loanContract.id },
-		typeof data?.loanContract.id,
-	);
+	// console.log(
+	// 	{ id: data?.loanContract.id },
+	// 	typeof data?.loanContract.id,
+	// );
 	const handleLoanAction = (action: string) => {
 		console.log(`Action: ${action}`);
 	};

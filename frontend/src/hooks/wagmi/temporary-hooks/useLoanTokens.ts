@@ -25,7 +25,7 @@ export function useLoanTokens(loanId: Address) {
 		? lockedTokensData.tokens.map((token: bigint) => Number(token))
 		: [];
 
-	console.log({ tokenDetails });
+	// console.log({ tokenDetails });
 	// console.log({ lockedTokensData });
 
 

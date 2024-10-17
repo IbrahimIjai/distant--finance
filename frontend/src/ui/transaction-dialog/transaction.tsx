@@ -41,8 +41,8 @@ export function TransactionDialog({
 		abi,
 		functionName,
 		value,
-		setTransaction,
 		resetTransaction,
+		setTransaction,
 	} = useTransactionStore();
 
 	const {
@@ -64,7 +64,7 @@ export function TransactionDialog({
 		value: BigInt(value ?? "0"),
 	});
 
-	console.log({ WriteContractError, WaitForTransactionReceiptError });
+	// console.log({ WriteContractError, WaitForTransactionReceiptError });
 
 	const handleConfirm = () => {
 		write();

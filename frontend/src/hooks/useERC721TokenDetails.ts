@@ -30,7 +30,7 @@ async function fetchTokenDetails(
 	});
 
 	const { meta } = response.data;
-	console.log({ meta });
+	// console.log({ meta });
 	return {
 		name: meta.name,
 		description: meta.description,
