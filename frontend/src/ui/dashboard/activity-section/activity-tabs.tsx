@@ -7,20 +7,13 @@ import { useQuery } from "@apollo/client";
 import { GET_ACCOUNT } from "@/lib/gql-queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoanCard } from "./loan-card";
-import { formatEther, zeroAddress } from "viem";
+import { formatEther } from "viem";
 import { TransactionDialog } from "@/ui/transaction-dialog/transaction";
 import { Button } from "@/components/ui/button";
 import { TransactionType, useTransactionStore } from "@/store/transactionStore";
 import { P2PLENDING } from "@/config";
 import { P2PLENDING_ABI } from "@/config/abi";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, ExternalLink } from "lucide-react";
 import Link from "next/link";

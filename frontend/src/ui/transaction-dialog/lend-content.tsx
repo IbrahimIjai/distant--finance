@@ -44,7 +44,7 @@ export function LendComponent({ loanId, loanAmount }: LendComponentProps) {
 			functionName: selectedToken === "WETH" ? "lendInWETH" : "lendInETH",
 			value: selectedToken === "ETH" ? loanAmount : undefined,
 		});
-	}, [selectedToken, loanId, loanAmount, setTransaction]);
+	}, [selectedToken, loanId, loanAmount, setTransaction, canLendWithToken]);
 
 	return (
 		<div className="w-full max-w-md mx-auto space-y-6">

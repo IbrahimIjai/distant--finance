@@ -46,6 +46,22 @@ export function BidComponent({
 	const [interestRate, setInterestRate] = useState("10500");
 	const [selectedToken, setSelectedToken] = useState<"ETH" | "WETH">("ETH");
 
+	const formatInterestRate = (rate: string) => {
+		return `${(Number(rate) / 100).toFixed(2)}%`;
+	};
+
+	const formatBalance = (balance: bigint | undefined) => {
+		return balance ? Number(formatEther(balance)).toFixed(4) : "0.0000";
+	};
+
+	const canBidWithToken = (token: "ETH" | "WETH") => {
+		const balance = token === "ETH" ? ethBalance?.value : wethBalance?.value;
+		return balance !== undefined && balance >= BigInt(loanAmount);
+	};
+
+	const hasInsufficientBalance =
+		!canBidWithToken("ETH") && !canBidWithToken("WETH");
+
 	useEffect(() => {
 		const isReady =
 			interestRate !== "" &&
@@ -63,28 +79,12 @@ export function BidComponent({
 	}, [
 		interestRate,
 		selectedToken,
+		canBidWithToken,
 		loanId,
 		contractAddress,
 		setTransaction,
 		loanAmount,
 	]);
-
-	const formatInterestRate = (rate: string) => {
-		return `${(Number(rate) / 100).toFixed(2)}%`;
-	};
-
-	const formatBalance = (balance: bigint | undefined) => {
-		return balance ? Number(formatEther(balance)).toFixed(4) : "0.0000";
-	};
-
-	const canBidWithToken = (token: "ETH" | "WETH") => {
-		const balance = token === "ETH" ? ethBalance?.value : wethBalance?.value;
-		return balance !== undefined && balance >= BigInt(loanAmount);
-	};
-
-	const hasInsufficientBalance =
-		!canBidWithToken("ETH") && !canBidWithToken("WETH");
-
 	if (hasInsufficientBalance) {
 		return (
 			<Alert variant="destructive">
