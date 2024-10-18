@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import { useTransactionStore } from "@/store/transactionStore";
 import {
 	Dialog,
@@ -33,8 +33,8 @@ export function TransactionDialog({
 	description,
 	confirmButtonText,
 }: TransactionDialogProps) {
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const {
-		isOpen,
 		isReady,
 		args,
 		contractAddress,
@@ -64,8 +64,6 @@ export function TransactionDialog({
 		value: BigInt(value ?? "0"),
 	});
 
-	// console.log({ WriteContractError, WaitForTransactionReceiptError });
-
 	const handleConfirm = () => {
 		write();
 	};
@@ -73,6 +71,7 @@ export function TransactionDialog({
 	const handleClose = () => {
 		resetTransaction();
 		reset();
+		setIsDialogOpen(false);
 	};
 
 	const handleRetry = () => {
@@ -92,10 +91,15 @@ export function TransactionDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
+			open={isDialogOpen}
 			onOpenChange={(open) => {
-				setTransaction({ isOpen: open });
-				reset();
+				setIsDialogOpen(open);
+				if (open) {
+					setTransaction({ isOpen: true });
+				} else {
+					resetTransaction();
+					reset();
+				}
 			}}>
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent className="">
@@ -104,7 +108,7 @@ export function TransactionDialog({
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 
-				{children}
+				{isDialogOpen && children}
 
 				<div className="mt-6">
 					{isPending || isConfirming ? (

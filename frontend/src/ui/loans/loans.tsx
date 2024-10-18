@@ -77,7 +77,6 @@ export default function LoansPage() {
 	const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 	const [filter, setFilter] = useState(filters[0].value);
 	const { data, loading, error } = useQuery(GET_LOANS);
-	const router = useRouter();
 
 	const collections = useMemo(() => {
 		if (!data?.loanContracts) return [];
@@ -162,7 +161,7 @@ export default function LoansPage() {
 					</MultiSelectorTrigger>
 					<MultiSelectorContent>
 						<MultiSelectorList>
-							{collections.map((collection, i, _) => (
+							{collections.map((collection, i) => (
 								<MultiSelectorItem key={i} value={collection.value as string}>
 									{collection.label as string}
 								</MultiSelectorItem>
