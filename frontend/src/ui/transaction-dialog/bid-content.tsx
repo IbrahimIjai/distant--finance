@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAccount, useBalance } from "wagmi";
 import { formatEther, Address } from "viem";
 import { useTransactionStore, TransactionType } from "@/store/transactionStore";
@@ -14,7 +14,8 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useForm, Controller } from "react-hook-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Link from "next/link";
 
 interface BidComponentProps {
 	loanId: string;
@@ -29,11 +30,6 @@ const presetInterestRates = [
 	{ value: "12000", label: "120%" },
 ];
 
-interface BidFormData {
-	interestRate: string;
-	selectedToken: "ETH" | "WETH";
-}
-
 export function BidComponent({
 	loanId,
 	loanAmount,
@@ -47,18 +43,14 @@ export function BidComponent({
 	});
 	const setTransaction = useTransactionStore((state) => state.setTransaction);
 
-	const { control, watch } = useForm<BidFormData>({
-		defaultValues: {
-			interestRate: "10500",
-			selectedToken: "ETH",
-		},
-	});
-
-	const interestRate = watch("interestRate");
-	const selectedToken = watch("selectedToken");
+	const [interestRate, setInterestRate] = useState("10500");
+	const [selectedToken, setSelectedToken] = useState<"ETH" | "WETH">("ETH");
 
 	useEffect(() => {
-		const isReady = interestRate !== "" && selectedToken !== undefined;
+		const isReady =
+			interestRate !== "" &&
+			selectedToken !== undefined &&
+			canBidWithToken(selectedToken);
 		setTransaction({
 			isReady,
 			type: TransactionType.BID,
@@ -68,7 +60,14 @@ export function BidComponent({
 			functionName: selectedToken === "WETH" ? "bidInWETH" : "bidInETH",
 			value: selectedToken === "ETH" ? loanAmount : null,
 		});
-	}, [interestRate, selectedToken, loanId, contractAddress, setTransaction]);
+	}, [
+		interestRate,
+		selectedToken,
+		loanId,
+		contractAddress,
+		setTransaction,
+		loanAmount,
+	]);
 
 	const formatInterestRate = (rate: string) => {
 		return `${(Number(rate) / 100).toFixed(2)}%`;
@@ -82,6 +81,25 @@ export function BidComponent({
 		const balance = token === "ETH" ? ethBalance?.value : wethBalance?.value;
 		return balance !== undefined && balance >= BigInt(loanAmount);
 	};
+
+	const hasInsufficientBalance =
+		!canBidWithToken("ETH") && !canBidWithToken("WETH");
+
+	if (hasInsufficientBalance) {
+		return (
+			<Alert variant="destructive">
+				<AlertTitle>Insufficient Balance</AlertTitle>
+				<AlertDescription>
+					You don&apos;t have enough balance in either ETH or WETH to place a
+					bid. Please visit our{" "}
+					<Link href="/swap" className="font-bold underline">
+						swap page
+					</Link>{" "}
+					to convert your tokens.
+				</AlertDescription>
+			</Alert>
+		);
+	}
 
 	return (
 		<div className="w-full mx-auto">
@@ -100,60 +118,48 @@ export function BidComponent({
 							</Tooltip>
 						</TooltipProvider>
 					</Label>
-					<Controller
-						name="interestRate"
-						control={control}
-						render={({ field }) => (
-							<RadioGroup
-								onValueChange={field.onChange}
-								value={field.value}
-								className="flex flex-row flex-wrap gap-4">
-								{presetInterestRates.map((rate) => (
-									<div key={rate.value}>
-										<RadioGroupItem
-											value={rate.value}
-											id={`rate-${rate.value}`}
-											className="peer sr-only"
-										/>
-										<Label
-											htmlFor={`rate-${rate.value}`}
-											className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-											{rate.label}
-										</Label>
-									</div>
-								))}
-								<div>
-									<RadioGroupItem
-										value="custom"
-										id="rate-custom"
-										className="peer sr-only"
-									/>
-									<Label
-										htmlFor="rate-custom"
-										className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-										Custom
-									</Label>
-								</div>
-							</RadioGroup>
-						)}
-					/>
+					<RadioGroup
+						onValueChange={setInterestRate}
+						value={interestRate}
+						className="flex flex-row flex-wrap gap-4">
+						{presetInterestRates.map((rate) => (
+							<div key={rate.value}>
+								<RadioGroupItem
+									value={rate.value}
+									id={`rate-${rate.value}`}
+									className="peer sr-only"
+								/>
+								<Label
+									htmlFor={`rate-${rate.value}`}
+									className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+									{rate.label}
+								</Label>
+							</div>
+						))}
+						<div>
+							<RadioGroupItem
+								value="custom"
+								id="rate-custom"
+								className="peer sr-only"
+							/>
+							<Label
+								htmlFor="rate-custom"
+								className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+								Custom
+							</Label>
+						</div>
+					</RadioGroup>
 				</div>
 
 				{interestRate === "custom" && (
 					<div className="space-y-4">
-						<Controller
-							name="interestRate"
-							control={control}
-							render={({ field }) => (
-								<Slider
-									min={10000}
-									max={20000}
-									step={100}
-									value={[Number(field.value)]}
-									onValueChange={(value) => field.onChange(value[0].toString())}
-									className="my-6"
-								/>
-							)}
+						<Slider
+							min={10000}
+							max={20000}
+							step={100}
+							value={[Number(interestRate)]}
+							onValueChange={(value) => setInterestRate(value[0].toString())}
+							className="my-6"
 						/>
 						<div className="flex justify-between text-sm text-muted-foreground">
 							<span>100%</span>
@@ -183,33 +189,25 @@ export function BidComponent({
 							</Tooltip>
 						</TooltipProvider>
 					</Label>
-					<Controller
-						name="selectedToken"
-						control={control}
-						render={({ field }) => (
-							<div className="grid grid-cols-2 gap-4">
-								{["ETH", "WETH"].map((token) => (
-									<Button
-										key={token}
-										variant={field.value === token ? "default" : "outline"}
-										className="w-full h-auto py-2 px-4 flex flex-col items-center justify-center"
-										onClick={() => field.onChange(token)}
-										disabled={!canBidWithToken(token as "ETH" | "WETH")}>
-										<Coins className="w-5 h-5 mb-1" />
-										<span className="font-medium">{token}</span>
-										<span className="text-sm text-muted-foreground">
-											{formatBalance(
-												token === "ETH"
-													? ethBalance?.value
-													: wethBalance?.value,
-											)}{" "}
-											{token}
-										</span>
-									</Button>
-								))}
-							</div>
-						)}
-					/>
+					<div className="grid grid-cols-2 gap-4">
+						{["ETH", "WETH"].map((token) => (
+							<Button
+								key={token}
+								variant={selectedToken === token ? "default" : "outline"}
+								className="w-full h-auto py-2 px-4 flex flex-col items-center justify-center"
+								onClick={() => setSelectedToken(token as "ETH" | "WETH")}
+								disabled={!canBidWithToken(token as "ETH" | "WETH")}>
+								<Coins className="w-5 h-5 mb-1" />
+								<span className="font-medium">{token}</span>
+								<span className="text-sm text-muted-foreground">
+									{formatBalance(
+										token === "ETH" ? ethBalance?.value : wethBalance?.value,
+									)}{" "}
+									{token}
+								</span>
+							</Button>
+						))}
+					</div>
 				</div>
 			</div>
 		</div>
