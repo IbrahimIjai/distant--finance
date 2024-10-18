@@ -7,13 +7,14 @@ const loanContract = gql`
 		id
 		interest
 		expiry
+		status
 	}
 `;
 const lockID = gql`
 	fragment lockID on lockId {
 		tokens {
 			tokenId
-			tokenURI
+			
 		}
 		collection {
 			id
@@ -135,7 +136,7 @@ export const GET_ACCOUNT = gql`
 
 export const GET_LOANS = gql`
 	query MyQuery {
-		loanContracts(where: { status: PENDING }) {
+		loanContracts{
 			...loanContract
 			lockId {
 				...lockID
