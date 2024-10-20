@@ -28,7 +28,7 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 	const bids: Bid[] = data?.loanContract.bids ?? [];
 	const loanStatus = data?.loanContract.status;
 
-	console.log({ loanStatus });
+	console.log({ loan: data?.loanContract });
 	const { tokenDetails } = useLoanTokens(id as Address);
 
 	const handleLoanAction = (action: string) => {

@@ -7,19 +7,20 @@ import { P2PLENDING } from "@/config";
 import { P2PLENDING_ABI } from "@/config/abi";
 import { slice } from "@/lib/utils";
 
-interface CancelLoanTransactionProps {
-	bidder: string;
+interface RepayLoanTransactionProps {
+	lender: string;
 	loanId: string;
 	amount: string;
-	proposedInterest: bigint;
+	proposedInterest: string;
+	expiry: string;
 }
 
-export function CancelLoanRequest({
-	bidder,
+export function RepayLoanTransaction({
+	lender,
 	loanId,
 	amount,
 	proposedInterest,
-}: CancelLoanTransactionProps) {
+}: RepayLoanTransactionProps) {
 	const setTransaction = useTransactionStore((state) => state.setTransaction);
 
 	useEffect(() => {
@@ -30,18 +31,19 @@ export function CancelLoanRequest({
 			args: [loanId as Address],
 			contractAddress: P2PLENDING,
 			abi: P2PLENDING_ABI,
-			functionName: "closeContract",
+			functionName: "repayLoan",
 		});
-	}, [setTransaction, bidder, loanId]);
+	}, [setTransaction, lender, loanId]);
 
 	return (
 		<div>
 			<div className="pt-6">
 				<Alert>
 					<AlertCircle className="h-4 w-4" />
-					<AlertTitle>Confirm Close Loan contract</AlertTitle>
+					<AlertTitle>Confirm Repay Loan</AlertTitle>
 					<AlertDescription className="w-fit">
-						You are about to close a loan which has not been funded
+						You are about to REPAY a loan which has been funded recently by{" "}
+						{slice(lender)}
 						<br />
 						loanId: {slice(loanId)}
 						<br />

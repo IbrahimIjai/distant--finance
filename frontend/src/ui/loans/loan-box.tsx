@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { formatEther } from "viem";
 import {
 	Card,
@@ -15,6 +15,8 @@ import { LoanStatus } from "@/lib/types";
 import { slice } from "@/lib/utils";
 import { TransactionDialog } from "../transaction-dialog/transaction";
 import { LendComponent } from "../transaction-dialog/lend-content";
+import { RepayLoanTransaction } from "../transaction-dialog/loan/repay-loan-transaction";
+import { ApprovalERC20 } from "../checkers/erc20-approval";
 interface LoanData {
 	id: string;
 	amount: string;
@@ -46,6 +48,13 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 		(expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
 	);
 
+	const totalRepaymentAmount = useMemo(() => {
+		const principal = BigInt(amount ?? "0");
+		const interestAmount =
+			(principal * BigInt(interest ?? "0")) / BigInt(10000);
+		return principal + interestAmount;
+	}, [amount, interest]);
+
 	const isOwner =
 		borrower && address?.toLowerCase() === borrower.id.toLowerCase();
 	const isLender = lender && address?.toLowerCase() === lender.id.toLowerCase();
@@ -53,22 +62,38 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 	const getActionButton = () => {
 		if (status === LoanStatus.PENDING && isOwner) {
 			return (
-				<Button
-					variant="destructive"
-					onClick={() => onAction("cancel")}
-					className="w-full">
-					Cancel Loan Request
-				</Button>
+				<TransactionDialog
+					trigger={<Button className="w-full"> Cancel Loan Request</Button>}
+					title="Cancel Loan Request"
+					trxTitle="Cancelling Loan ...."
+					description="You are about to cancel a loan you just open which has not been funded yet">
+					<RepayLoanTransaction
+						lender={loan.lender?.id}
+						loanId={loan.id}
+						amount={loan.amount}
+						proposedInterest={loan.interest.toString()}
+						expiry={loan.expiry}
+					/>
+				</TransactionDialog>
 			);
 		} else if (status === LoanStatus.ACTIVE) {
 			if (isOwner) {
 				return (
-					<Button
-						variant="default"
-						onClick={() => onAction("repay")}
-						className="w-full">
-						Repay Loan
-					</Button>
+					<ApprovalERC20 amount={totalRepaymentAmount}>
+						<TransactionDialog
+							trigger={<Button className="w-full"> Repay Loan</Button>}
+							title="Accept Bid"
+							trxTitle="Accepting bid..."
+							description="Accept the proposed bid for your loan">
+							<RepayLoanTransaction
+								lender={loan.lender?.id}
+								loanId={loan.id}
+								amount={loan.amount}
+								proposedInterest={loan.interest.toString()}
+								expiry={loan.expiry}
+							/>
+						</TransactionDialog>
+					</ApprovalERC20>
 				);
 			} else if (isLender && isExpired) {
 				return (

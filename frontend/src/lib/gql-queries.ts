@@ -63,6 +63,12 @@ export const GET_LOAN = gql`
 					...accountStats
 				}
 			}
+			lender {
+				id
+				accountStatistic {
+					...accountStats
+				}
+			}
 			bids {
 				proposedInterest
 				status

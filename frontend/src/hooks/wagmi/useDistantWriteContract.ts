@@ -10,7 +10,9 @@ export type TrxTitle =
 	| "Lending..."
 	| "Claiming all lost bids..."
 	| "Cancelling bid..."
-	| "Accepting bid...";
+	| "Accepting bid..."
+	| "Approving ERC20 Token"
+	| "Cancelling Loan ....";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,
