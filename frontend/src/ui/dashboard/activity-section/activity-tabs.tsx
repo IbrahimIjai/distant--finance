@@ -1,26 +1,39 @@
 "use client";
-import React, { useMemo } from "react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { useQuery } from "@apollo/client";
+import { formatEther, zeroAddress } from "viem";
 import { GET_ACCOUNT } from "@/lib/gql-queries";
-import { Skeleton } from "@/components/ui/skeleton";
-import { LoanCard } from "./loan-card";
-import { formatEther } from "viem";
-import { TransactionDialog } from "@/ui/transaction-dialog/transaction";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TransactionDialog } from "@/ui/transaction-dialog/transaction";
 import { TransactionType, useTransactionStore } from "@/store/transactionStore";
 import { P2PLENDING } from "@/config";
-import { P2PLENDING_ABI } from "@/config/abi";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ExternalLink } from "lucide-react";
+import {
+	AlertCircle,
+	ExternalLink,
+	FileQuestion,
+	PlusCircle,
+} from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { LoanCard } from "./loan-card";
+import { P2PLENDING_ABI } from "@/config/abi";
+import { Badge } from "@/components/ui/badge";
+import { TransactionTable } from "./transaction-table";
+
+export interface Transaction {
+	txType: string;
+	id: string;
+	timestamp: string;
+}
 
 export interface Loan {
 	id: string;
-
 	amount: bigint;
 	expiry: bigint;
 	interest: bigint;
@@ -28,10 +41,9 @@ export interface Loan {
 	collection: string;
 	lender: string;
 	borrower: string;
-
 	status: "ACTIVE" | "PENDING";
+	transactions: Transaction[];
 }
-
 interface LoanBid {
 	id: string;
 	status: string;
@@ -44,26 +56,47 @@ interface LoanBid {
 		expiry: string;
 	};
 }
-export function TabsContainer() {
+
+function NoLoansFound({ type }: { type: "active" | "pending" | "bids" }) {
+	return (
+		<div className="flex flex-col items-center justify-center h-64 text-center">
+			<FileQuestion className="w-16 h-16 text-muted-foreground mb-4" />
+			<h3 className="text-lg font-semibold mb-2">No {type} loans found</h3>
+			<p className="text-muted-foreground mb-4">
+				{type === "bids"
+					? "You haven't placed any bids yet."
+					: `You don't have any ${type} loans at the moment.`}
+			</p>
+			<Link href="/loans">
+				<Button>
+					<PlusCircle className="mr-2 h-4 w-4" />
+					{type === "bids" ? "Place a Bid" : "Create a Loan"}
+				</Button>
+			</Link>
+		</div>
+	);
+}
+
+export function LoanActivitiesTab() {
 	const { address } = useAccount();
 	const { data, error, loading } = useQuery(GET_ACCOUNT, {
-		variables: { account: address?.toLocaleLowerCase() },
+		variables: { account: address?.toLowerCase() },
 	});
 	const setTransaction = useTransactionStore((state) => state.setTransaction);
 
 	const allLoans: Loan[] = useMemo(() => {
 		if (!data?.account) return [];
 		return [...(data.account.borrows || []), ...(data.account.lends || [])].map(
-			(loan) => {
-				return {
-					...loan,
-					amount: BigInt(loan.amount),
-					expiry: BigInt(loan.expiry),
-					interest: BigInt(loan.interest),
-					lender: loan.lender.id,
-					borrower: loan?.borrower.id,
-				};
-			},
+			(loan) => ({
+				...loan,
+				amount: BigInt(loan.amount),
+				expiry: BigInt(loan.expiry),
+				interest: BigInt(loan.interest),
+				lender: loan.lender ? loan.lender?.id : zeroAddress,
+				borrower: loan?.borrower.id,
+
+				transactions: loan.transactions,
+			}),
 		);
 	}, [data]);
 
@@ -78,6 +111,19 @@ export function TabsContainer() {
 	);
 
 	const loanBids = data?.account?.loanBids || [];
+	console.log({ allLoans });
+
+	const transactions = useMemo(() => {
+		return allLoans
+			.map((loan) =>
+				loan.transactions.map((tx) => ({
+					...tx,
+					amount: loan.amount.toString(),
+					interest: loan.interest.toString(),
+				})),
+			)
+			.flat();
+	}, [allLoans]);
 
 	const handleClaim = () => {
 		setTransaction({
@@ -92,11 +138,11 @@ export function TabsContainer() {
 	};
 
 	const renderLoanBids = (bids: LoanBid[]) => (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+		<div className="space-y-4">
 			<TransactionDialog
 				trxTitle="Claiming all lost bids..."
 				trigger={
-					<Button onClick={handleClaim} className="mb-4">
+					<Button onClick={handleClaim} className="w-full mb-4">
 						Claim Lost Bids
 					</Button>
 				}
@@ -115,29 +161,37 @@ export function TabsContainer() {
 					</CardContent>
 				</Card>
 			</TransactionDialog>
-			{bids.map((bid) => (
-				<div
-					key={bid.id}
-					className="w-full flex flex-col bg-card border rounded-md p-2">
-					<div className="flex text-sm justify-between items-center">
-						<span className="font-bold">
-							{formatEther(BigInt(bid.contract.amount))} ETH
-						</span>
-						<Link href={`/loans/${bid.contract.id}`}>
-							<ExternalLink className="h-4 w-4 text-muted-foreground hover:text-primary" />
-						</Link>
-					</div>
-					{/* <div className="text-xs">
-							collection:{slice(bid.contract.collection)}
-						</div> */}
-				</div>
-			))}
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				{bids.map((bid) => (
+					<Card key={bid.id} className={cn("w-full")}>
+						<CardContent className="p-4">
+							<div className="flex justify-between items-center">
+								<span className="font-bold">
+									{formatEther(BigInt(bid.contract.amount))} ETH
+								</span>
+								<Badge
+									variant={bid.status.toLowerCase() as "default" | "secondary"}>
+									{bid.status}
+								</Badge>
+							</div>
+							<div className="mt-2 flex justify-between items-center text-sm text-muted-foreground">
+								<span>Interest: {bid.proposedInterest}%</span>
+								<Link href={`/loans/${bid.contract.id}`}>
+									<Button variant="ghost" size="sm">
+										<ExternalLink className="h-4 w-4 mr-1" />
+										View
+									</Button>
+								</Link>
+							</div>
+						</CardContent>
+					</Card>
+				))}
+			</div>
 		</div>
 	);
 
-	console.log({ activeLoans: activeLoans });
 	const renderLoans = (loans: Loan[], type: "active" | "pending") => (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 			{loans.map((loan) => (
 				<LoanCard key={loan.id} loan={loan} type={type} />
 			))}
@@ -145,71 +199,88 @@ export function TabsContainer() {
 	);
 
 	const renderLoadingState = () => (
-		<div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-			{[1, 2, 3, 4, 5, 6].map((i) => (
-				<Card key={i} className="w-full max-w-md overflow-hidden">
-					<Skeleton className="h-48 w-full" />
-					<CardContent className="pt-6">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+			{[1, 2, 3, 4].map((i) => (
+				<Card key={i} className="w-full">
+					<CardContent className="p-6">
 						<Skeleton className="h-8 w-3/4 mb-4" />
 						<Skeleton className="h-4 w-full mb-2" />
 						<Skeleton className="h-4 w-full mb-2" />
 						<Skeleton className="h-4 w-full" />
 					</CardContent>
-					<CardFooter>
-						<Skeleton className="h-10 w-full" />
-					</CardFooter>
 				</Card>
 			))}
 		</div>
 	);
 
 	return (
-		<Tabs defaultValue="tab1" className="w-full">
-			<TabsList className="grid w-full grid-cols-3">
-				<TabsTrigger className="tabTrigger" value="tab1">
-					Active Loans
-				</TabsTrigger>
-				<TabsTrigger className="tabTrigger" value="tab2">
-					Pending Loans
-				</TabsTrigger>
-				<TabsTrigger className="tabTrigger" value="tab3">
-					Loan Bids
-				</TabsTrigger>
-			</TabsList>
-
-			<TabsContent className="tabContent" value="tab1">
-				{loading ? (
-					renderLoadingState()
-				) : error ? (
-					<p>Error loading loans. Please try again.</p>
-				) : activeLoans.length > 0 ? (
-					renderLoans(activeLoans, "active")
-				) : (
-					<p>No active loans found.</p>
-				)}
-			</TabsContent>
-			<TabsContent className="tabContent" value="tab2">
-				{loading ? (
-					renderLoadingState()
-				) : error ? (
-					<p>Error loading loans. Please try again.</p>
-				) : pendingLoans.length > 0 ? (
-					renderLoans(pendingLoans, "pending")
-				) : (
-					<p>No pending loans found.</p>
-				)}
-			</TabsContent>
-			<TabsContent className="tabContent" value="tab3">
-				{loading ? (
-					renderLoadingState()
-				) : error ? (
-					<p>Error loading loan bids. Please try again.</p>
-				) : loanBids.length > 0 ? (
-					renderLoanBids(loanBids)
-				) : (
-					<p>No loan bids found.</p>
-				)}
-			</TabsContent>
-		</Tabs>
+		<>
+			<Card className="w-full mb-6">
+				<CardHeader>
+					<CardTitle>Loan Activity</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<Tabs defaultValue="active" className="w-full">
+						<TabsList className="grid w-full grid-cols-3 mb-6">
+							<TabsTrigger value="active">Active Loans</TabsTrigger>
+							<TabsTrigger value="pending">Pending Loans</TabsTrigger>
+							<TabsTrigger value="bids">Loan Bids</TabsTrigger>
+						</TabsList>
+						<TabsContent value="active">
+							{loading ? (
+								renderLoadingState()
+							) : error ? (
+								<Alert variant="destructive">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle>Error</AlertTitle>
+									<AlertDescription>
+										Failed to load active loans. Please try again.
+									</AlertDescription>
+								</Alert>
+							) : activeLoans.length > 0 ? (
+								renderLoans(activeLoans, "active")
+							) : (
+								<NoLoansFound type="active" />
+							)}
+						</TabsContent>
+						<TabsContent value="pending">
+							{loading ? (
+								renderLoadingState()
+							) : error ? (
+								<Alert variant="destructive">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle>Error</AlertTitle>
+									<AlertDescription>
+										Failed to load pending loans. Please try again.
+									</AlertDescription>
+								</Alert>
+							) : pendingLoans.length > 0 ? (
+								renderLoans(pendingLoans, "pending")
+							) : (
+								<NoLoansFound type="pending" />
+							)}
+						</TabsContent>
+						<TabsContent value="bids">
+							{loading ? (
+								renderLoadingState()
+							) : error ? (
+								<Alert variant="destructive">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle>Error</AlertTitle>
+									<AlertDescription>
+										Failed to load loan bids. Please try again.
+									</AlertDescription>
+								</Alert>
+							) : loanBids.length > 0 ? (
+								renderLoanBids(loanBids)
+							) : (
+								<NoLoansFound type="bids" />
+							)}
+						</TabsContent>
+					</Tabs>
+				</CardContent>
+			</Card>
+			<TransactionTable transactions={transactions} isLoading={loading} />
+		</>
 	);
 }

@@ -8,7 +8,9 @@ export type TrxTitle =
 	| "Opening Loan Contract"
 	| "Placing a bid..."
 	| "Lending..."
-	| "Claiming all lost bids...";
+	| "Claiming all lost bids..."
+	| "Cancelling bid..."
+	| "Accepting bid...";
 
 export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 	fn,

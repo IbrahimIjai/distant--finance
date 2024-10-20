@@ -14,7 +14,6 @@ const lockID = gql`
 	fragment lockID on lockId {
 		tokens {
 			tokenId
-			
 		}
 		collection {
 			id
@@ -40,6 +39,7 @@ const TX = gql`
 	fragment TX on transaction {
 		txType
 		id
+		timestamp
 	}
 `;
 
@@ -136,7 +136,7 @@ export const GET_ACCOUNT = gql`
 
 export const GET_LOANS = gql`
 	query MyQuery {
-		loanContracts{
+		loanContracts {
 			...loanContract
 			lockId {
 				...lockID

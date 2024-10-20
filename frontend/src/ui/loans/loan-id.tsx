@@ -26,7 +26,9 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 	});
 
 	const bids: Bid[] = data?.loanContract.bids ?? [];
+	const loanStatus = data?.loanContract.status;
 
+	console.log({ loanStatus });
 	const { tokenDetails } = useLoanTokens(id as Address);
 
 	const handleLoanAction = (action: string) => {
@@ -63,6 +65,7 @@ const LoanIdComponent: React.FC<{ id: string }> = ({ id }) => {
 						amount={data?.loanContract.amount ?? "0"}
 						loading={isLoading}
 						borrower={data?.loanContract.borrower.id as Address}
+						loanStatus={loanStatus as LoanStatus}
 					/>
 					<LoanBox
 						loan={{

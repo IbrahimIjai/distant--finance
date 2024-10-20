@@ -38,7 +38,7 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 	const { address } = useAccount();
 	const { amount, interest, expiry, borrower, lender, status } = loan;
 	const formattedAmount = amount && formatEther(BigInt(amount));
-	const formattedInterest = interest / 100; // Assuming interest is in basis points
+	const formattedInterest = interest / 100;
 	const expiryDate = new Date(parseInt(expiry) * 1000);
 	const now = new Date();
 	const isExpired = expiryDate < now;

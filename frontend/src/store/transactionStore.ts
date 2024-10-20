@@ -12,8 +12,8 @@ export enum TransactionType {
 type TransactionArgs =
 	| [string] // for CANCEL_LOAN, ACCEPT_BID, CANCEL_BID (loanId)
 	| [string, bigint] // for LEND (loanId, amount)
-	| [number, string]; // for BID (loanId, proposedInterest)
-
+	| [number, string] // for BID (loanId, proposedInterest)
+	| [Address, Address];// for BidAccep(address, loanId)
 interface TransactionState {
 	isOpen: boolean;
 	isReady: boolean;

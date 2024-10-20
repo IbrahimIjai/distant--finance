@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ERC721, ProcessedNFTData } from "@/lib/types";
 import { useNFTStore } from "@/store/selected-nft";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileQuestion, Info } from "lucide-react";
 import { useState } from "react";
 import CompletionComponent from "./collection-selector-loan-request";
 import { Checker } from "../checkers";
@@ -21,6 +21,7 @@ import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { extractAddress } from "@/lib/nft-helpers";
 import { supportedCollections } from "@/config";
+import Link from "next/link";
 
 // import { useBalanceStore } from "@/store/NFTBalance";
 // import {
@@ -82,10 +83,35 @@ export function CollectionSelector({
 		setShowCompletion(true);
 	};
 
+	const supportedNFTs = Object.entries(processedNFTData).filter(
+		([, collectionData]) => {
+			const addressToCheck = extractAddress(collectionData.collectionAddress);
+			return supportedCollections
+				.map((item) => item.toLowerCase())
+				.includes(addressToCheck.toLowerCase());
+		},
+	);
+
 	if (showCompletion) {
 		return <CompletionComponent onBack={() => setShowCompletion(false)} />;
 	}
 
+	if (supportedNFTs.length === 0) {
+		return (
+			<div className="flex flex-col items-center justify-center h-[400px] text-center">
+				<FileQuestion className="w-16 h-16 text-muted-foreground mb-4" />
+				<h2 className="text-xl font-semibold mb-2">No Supported NFTs Found</h2>
+				<p className="text-muted-foreground mb-4 max-w-md">
+					You don&apos;t have any NFTs from our supported collections. Please
+					check our documentation for a list of supported collections and where
+					to acquire them.
+				</p>
+				<Link href="/docs/supported-collections">
+					<Button>View Supported Collections</Button>
+				</Link>
+			</div>
+		);
+	}
 	return (
 		<div className="flex flex-col gap-3 w-full">
 			<aside>
@@ -158,9 +184,6 @@ export function CollectionSelector({
 				) : (
 					Object.entries(processedNFTData).map(
 						([collectionName, collectionData]) => {
-							// console.log({
-							// 	address: extractAddress(collectionData.collectionAddress),
-							// });
 							const addressToCheck = extractAddress(
 								collectionData.collectionAddress,
 							);

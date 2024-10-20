@@ -21,9 +21,12 @@ import {
 } from "@/components/ui/tooltip";
 import { InboxIcon, HelpCircle } from "lucide-react";
 import { TransactionDialog } from "../transaction-dialog/transaction";
-import { BidComponent } from "../transaction-dialog/bid-content";
+import { BidComponent } from "../transaction-dialog/bids/bid-content";
 import { P2PLENDING } from "@/config";
 import { slice } from "@/lib/utils";
+import { LoanStatus } from "@/lib/types";
+import { CancelBidTransaction } from "../transaction-dialog/bids/cancel-bid-transaction";
+import { AcceptBidTransaction } from "../transaction-dialog/bids/accept-bid-transaction";
 
 export interface Bid {
 	proposedInterest: bigint;
@@ -39,6 +42,7 @@ interface BidsTableProps {
 	borrower: Address;
 	amount: string;
 	loanId: string;
+	loanStatus: LoanStatus;
 }
 
 export function BidsTable({
@@ -47,6 +51,7 @@ export function BidsTable({
 	borrower,
 	amount,
 	loanId,
+	loanStatus,
 }: BidsTableProps) {
 	const { address } = useAccount();
 
@@ -57,6 +62,42 @@ export function BidsTable({
 	}
 	const isBorrower =
 		borrower.toString().toLowerCase() === address?.toString().toLowerCase();
+
+	const renderActionButton = (bid: Bid) => {
+		if (isBorrower && loanStatus === "PENDING") {
+			return (
+				<TransactionDialog
+					trigger={<Button>Accept Bid</Button>}
+					title="Accept Bid"
+					trxTitle="Accepting bid..."
+					description="Accept the proposed bid for your loan">
+					<AcceptBidTransaction
+						bidder={bid.bidder.id}
+						loanId={loanId}
+						amount={amount}
+						proposedInterest={bid.proposedInterest}
+					/>
+				</TransactionDialog>
+			);
+		}
+
+		if (bid.bidder.id.toLowerCase() === address?.toLowerCase()) {
+			if (loanStatus === "PENDING") {
+				return (
+					<TransactionDialog
+						trigger={<Button>Cancel Bid</Button>}
+						title="Cancel Bid"
+						trxTitle="Cancelling bid..."
+						description="Cancel your bid and retrieve your funds">
+						<CancelBidTransaction loanId={loanId} amount={amount} />
+					</TransactionDialog>
+				);
+			} else if (loanStatus === "ACTIVE" && bid.status !== "ACCEPTED") {
+				return <Button variant="outline">Claim Lost Bid</Button>;
+			}
+		}
+		return <Button variant="outline">{bid.status}</Button>;
+	};
 
 	return (
 		<div className="p-4 space-y-4 border bg-card rounded-lg  w-full">
@@ -123,19 +164,7 @@ export function BidsTable({
 							<TableRow key={index}>
 								<TableCell>{slice(bid.bidder.id)}</TableCell>
 								<TableCell>{Number(bid.proposedInterest) / 100}%</TableCell>
-								<TableCell>
-									{address?.toLowerCase() === borrower.toLowerCase() ? (
-										<Button onClick={() => {}}>Accept Bid</Button>
-									) : address?.toLowerCase() === bid.bidder.id.toLowerCase() ? (
-										<>
-											{bid.status === "ACCEPTED" ? (
-												<p className="text-muted-foreground">Bid Accepted</p>
-											) : (
-												<Button onClick={() => {}}>Claim Bid</Button>
-											)}
-										</>
-									) : null}
-								</TableCell>
+								<TableCell>{renderActionButton(bid)}</TableCell>
 							</TableRow>
 						))
 					)}

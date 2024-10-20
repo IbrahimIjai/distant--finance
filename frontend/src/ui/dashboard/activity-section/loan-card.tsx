@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { slice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
-import { Clock, Percent } from "lucide-react";
+import { Clock, Percent, User, Coins } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 	CardContent,
 	CardFooter,
 	CardHeader,
+	CardTitle,
 } from "@/components/ui/card";
 import { formatEther } from "viem";
 import { Loan } from "./activity-tabs";
@@ -26,47 +27,51 @@ export function LoanCard({
 	const { address } = useAccount();
 	const { push } = useRouter();
 	const isLender = loan.lender.toLowerCase() === address?.toLowerCase();
-	console.log({ lender: loan.lender, address, isLender });
+
+	const getStatusColor = () => {
+		if (type === "active") return "bg-green-500";
+		return "bg-yellow-500";
+	};
+
 	return (
 		<Card
-			className="w-full cursor-pointer hover:shadow-md transition-shadow"
+			className="w-full cursor-pointer hover:shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1"
 			onClick={() => push(`/loans/${loan.id}`)}>
-			<CardHeader>
-				<img
-					src="/images/loan.png"
-					alt="Loan visualization"
-					className="w-full h-48 object-cover"
-				/>
-			</CardHeader>
-
-			<CardContent className="pt-6">
-				<div className="flex justify-between items-center mb-4">
-					<span className="text-2xl font-bold">
+			<CardHeader className="pb-2">
+				<div className="flex justify-between items-center">
+					<CardTitle className="text-xl font-semibold flex items-center">
+						<Coins className="mr-2 h-6 w-6 text-primary" />
 						{formatEther(loan.amount)} ETH
-					</span>
-					<Badge variant={type === "active" ? "default" : "secondary"}>
+					</CardTitle>
+					<Badge
+						variant={type === "active" ? "default" : "secondary"}
+						className={`${getStatusColor()} text-white`}>
 						{type === "active" ? "Active" : "Pending"}
 					</Badge>
 				</div>
-				<div className="space-y-2">
-					<div className="flex items-center justify-between">
-						<span className="text-sm text-muted-foreground">
+			</CardHeader>
+
+			<CardContent className="pt-4">
+				<div className="space-y-3">
+					<div className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
+						<span className="text-sm flex items-center">
+							<User className="mr-2 h-4 w-4" />
 							{isLender ? "Borrower" : "Lender"}:
 						</span>
 						<span className="text-sm font-medium">
 							{slice(isLender ? loan.borrower : loan.lender)}
 						</span>
 					</div>
-					<div className="flex items-center justify-between">
-						<span className="text-sm text-muted-foreground flex items-center">
+					<div className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
+						<span className="text-sm flex items-center">
 							<Percent className="mr-2 h-4 w-4" /> APR:
 						</span>
 						<span className="text-sm font-medium">
 							{(Number(loan.interest) / 100).toFixed(2)}%
 						</span>
 					</div>
-					<div className="flex items-center justify-between">
-						<span className="text-sm text-muted-foreground flex items-center">
+					<div className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
+						<span className="text-sm flex items-center">
 							<Clock className="mr-2 h-4 w-4" /> Expiry:
 						</span>
 						<span className="text-sm font-medium">
@@ -76,9 +81,9 @@ export function LoanCard({
 				</div>
 			</CardContent>
 
-			<CardFooter>
+			<CardFooter className="pt-4">
 				<Button
-					className="w-full"
+					className="w-full font-semibold"
 					variant={type === "active" ? "default" : "outline"}>
 					{type === "active"
 						? isLender
