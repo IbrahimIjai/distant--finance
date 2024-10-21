@@ -74,7 +74,10 @@ const filters = [
 
 export default function LoansPage() {
 	const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
-	const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+	const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
+		"PENDING",
+		"ACTIVE",
+	]);
 	const [filter, setFilter] = useState(filters[0].value);
 	const { data, loading, error } = useQuery(GET_LOANS);
 
@@ -253,7 +256,7 @@ const LoanCard: React.FC<{ loan: Loan }> = ({ loan }) => {
 						<span className="text-sm text-muted-foreground flex items-center">
 							<Clock className="mr-2 h-4 w-4" /> Duration:
 						</span>
-						<span className="text-sm font-medium">{daysLeft} days left</span>
+						<span className="text-sm font-medium">{daysLeft} days </span>
 					</div>
 					<div className="flex items-center justify-between">
 						<span className="text-sm text-muted-foreground flex items-center">

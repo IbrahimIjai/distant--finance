@@ -236,7 +236,11 @@ export function CollectionSelector({
 					<Checker.ApprovalERC721
 						collectionAddress={selectedCollection.collectionAddress}
 						address={address!}>
-						<Button onClick={handleProceed}>Proceed</Button>
+						<Button
+							onClick={handleProceed}
+							disabled={selectedNFTs.length ? false : true}>
+							{selectedNFTs.length ? "Proceed" : "SelectNFTs"}
+						</Button>
 					</Checker.ApprovalERC721>
 				</Checker.Connect>
 			)}

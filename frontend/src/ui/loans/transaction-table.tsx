@@ -114,7 +114,7 @@ export default function TransactionTable({
 
 	return (
 		<div className="p-4 space-y-4 border bg-card rounded-lg">
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between flex-col lg:flex-row items-center">
 				<h2 className="text-2xl font-bold">Transactions</h2>
 				<div className="flex space-x-2">
 					<Select

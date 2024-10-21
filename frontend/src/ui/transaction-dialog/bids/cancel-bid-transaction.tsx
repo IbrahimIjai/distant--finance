@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { TransactionType, useTransactionStore } from "@/store/transactionStore";
 import { P2PLENDING } from "@/config";
 import { P2PLENDING_ABI } from "@/config/abi";
+import { slice } from "@/lib/utils";
 
 interface CancelBidTransactionProps {
 	loanId: string;
@@ -37,7 +38,7 @@ export function CancelBidTransaction({
 					<AlertCircle className="h-4 w-4" />
 					<AlertTitle>Confirm Bid Cancellation</AlertTitle>
 					<AlertDescription>
-						You are about to cancel your bid for loan {loanId}.
+						You are about to cancel your bid for loan {slice(loanId)}.
 						<br />
 						You will receive back: {formatEther(BigInt(amount))} ETH
 					</AlertDescription>

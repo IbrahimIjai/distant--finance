@@ -28,6 +28,12 @@ import { LoanStatus } from "@/lib/types";
 import { CancelBidTransaction } from "../transaction-dialog/bids/cancel-bid-transaction";
 import { AcceptBidTransaction } from "../transaction-dialog/bids/accept-bid-transaction";
 
+enum BidStatus {
+	PENDING = "PENDING",
+	ACCEPTED = "ACCEPTED",
+	REJECTED = "REJECTED",
+	CANCELLED = "CANCELLED",
+}
 export interface Bid {
 	proposedInterest: bigint;
 	status: string;
@@ -63,6 +69,9 @@ export function BidsTable({
 	const isBorrower =
 		borrower.toString().toLowerCase() === address?.toString().toLowerCase();
 
+	const hasPlacedBid = bids.some(
+		(bid) => bid.bidder.id.toLowerCase() === address?.toLowerCase(),
+	);
 	const renderActionButton = (bid: Bid) => {
 		if (isBorrower && loanStatus === "PENDING") {
 			return (
@@ -82,22 +91,97 @@ export function BidsTable({
 		}
 
 		if (bid.bidder.id.toLowerCase() === address?.toLowerCase()) {
-			if (loanStatus === "PENDING") {
-				return (
-					<TransactionDialog
-						trigger={<Button>Cancel Bid</Button>}
-						title="Cancel Bid"
-						trxTitle="Cancelling bid..."
-						description="Cancel your bid and retrieve your funds">
-						<CancelBidTransaction loanId={loanId} amount={amount} />
-					</TransactionDialog>
-				);
-			} else if (loanStatus === "ACTIVE" && bid.status !== "ACCEPTED") {
-				return <Button variant="outline">Claim Lost Bid</Button>;
+			switch (bid.status) {
+				case BidStatus.PENDING:
+					if (loanStatus === "PENDING") {
+						return (
+							<TransactionDialog
+								trigger={<Button>Cancel Bid</Button>}
+								title="Cancel Bid"
+								trxTitle="Cancelling bid..."
+								description="Cancel your bid and retrieve your funds">
+								<CancelBidTransaction loanId={loanId} amount={amount} />
+							</TransactionDialog>
+						);
+					}
+					break;
+				case BidStatus.REJECTED:
+					return (
+						<TransactionDialog
+							trigger={<Button variant="outline">Rejected, Try Again</Button>}
+							title="Place a Bid"
+							trxTitle="Placing a bid..."
+							confirmButtonText="Place Bid"
+							description={`Deposit ${formatEther(
+								BigInt(amount),
+							)} WETH/ETH with your proposed interest rate`}>
+							<BidComponent
+								loanId={loanId}
+								loanAmount={amount}
+								contractAddress={P2PLENDING}
+							/>
+						</TransactionDialog>
+					);
+				case BidStatus.CANCELLED:
+					return (
+						<TransactionDialog
+							trigger={<Button variant="outline">Cancelled, Try Again</Button>}
+							title="Place a Bid"
+							trxTitle="Placing a bid..."
+							confirmButtonText="Place Bid"
+							description={`Deposit ${formatEther(
+								BigInt(amount),
+							)} WETH/ETH with your proposed interest rate`}>
+							<BidComponent
+								loanId={loanId}
+								loanAmount={amount}
+								contractAddress={P2PLENDING}
+							/>
+						</TransactionDialog>
+					);
+				case BidStatus.ACCEPTED:
+					return <Button variant="outline">Accepted</Button>;
 			}
 		}
+
 		return <Button variant="outline">{bid.status}</Button>;
 	};
+
+	// const renderActionButton = (bid: Bid) => {
+	// 	if (isBorrower && loanStatus === "PENDING") {
+	// 		return (
+	// 			<TransactionDialog
+	// 				trigger={<Button>Accept Bid</Button>}
+	// 				title="Accept Bid"
+	// 				trxTitle="Accepting bid..."
+	// 				description="Accept the proposed bid for your loan">
+	// 				<AcceptBidTransaction
+	// 					bidder={bid.bidder.id}
+	// 					loanId={loanId}
+	// 					amount={amount}
+	// 					proposedInterest={bid.proposedInterest}
+	// 				/>
+	// 			</TransactionDialog>
+	// 		);
+	// 	}
+
+	// 	if (bid.bidder.id.toLowerCase() === address?.toLowerCase()) {
+	// 		if (loanStatus === "PENDING" && bid.status !=="CANCELLED") {
+	// 			return (
+	// 				<TransactionDialog
+	// 					trigger={<Button>Cancel Bid</Button>}
+	// 					title="Cancel Bid"
+	// 					trxTitle="Cancelling bid..."
+	// 					description="Cancel your bid and retrieve your funds">
+	// 					<CancelBidTransaction loanId={loanId} amount={amount} />
+	// 				</TransactionDialog>
+	// 			);
+	// 		} else if (loanStatus === "ACTIVE" && bid.status !== "ACCEPTED") {
+	// 			return <Button variant="outline">Claim Lost Bid</Button>;
+	// 		}
+	// 	}
+	// 	return <Button variant="outline">{bid.status}</Button>;
+	// };
 
 	return (
 		<div className="p-4 space-y-4 border bg-card rounded-lg  w-full">
@@ -113,13 +197,15 @@ export function BidsTable({
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{bids.length === 0 ? (
+					{bids.length === 0 || (!hasPlacedBid && !isBorrower) ? (
 						<TableRow>
 							<TableCell colSpan={3}>
 								<div className="flex flex-col items-center justify-center p-8 text-center">
 									<InboxIcon className="w-16 h-16 text-gray-400 mb-4" />
 									<p className="text-lg font-semibold text-gray-700 mb-2">
-										Bids are not yet placed
+										{bids.length === 0
+											? "Bids are not yet placed"
+											: "You haven't placed a bid yet"}
 									</p>
 									{!isBorrower && (
 										<TransactionDialog

@@ -8,14 +8,12 @@ import { P2PLENDING_ABI } from "@/config/abi";
 import { slice } from "@/lib/utils";
 
 interface CancelLoanTransactionProps {
-	bidder: string;
 	loanId: string;
 	amount: string;
 	proposedInterest: bigint;
 }
 
 export function CancelLoanRequest({
-	bidder,
 	loanId,
 	amount,
 	proposedInterest,
@@ -32,7 +30,7 @@ export function CancelLoanRequest({
 			abi: P2PLENDING_ABI,
 			functionName: "closeContract",
 		});
-	}, [setTransaction, bidder, loanId]);
+	}, [setTransaction, loanId]);
 
 	return (
 		<div>

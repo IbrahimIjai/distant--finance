@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, CheckCircle, Info, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNFTStore } from "@/store/selected-nft";
@@ -23,14 +23,15 @@ import {
 // import P2P_LENDING_ABI from "@/config/abi/p2p.json";
 import { useDistantWriteContract } from "@/hooks/wagmi/useDistantWriteContract";
 import { P2PLENDING } from "@/config";
-import { parseEther, parseUnits } from "viem";
+import { Address, parseEther, parseUnits } from "viem";
 import { P2PLENDING_ABI } from "@/config/abi";
+import confetti from "canvas-confetti";
+import { slice } from "@/lib/utils";
 interface LoanData {
 	amount: string;
 	interest: string;
 	duration: number;
 }
-
 
 export default function CompletionComponent({
 	onBack,
@@ -48,7 +49,10 @@ export default function CompletionComponent({
 		isPending,
 		isConfirming,
 		isTrxSubmitted,
+		isConfirmed,
 		WriteContractError,
+		reset,
+		hash,
 		WaitForTransactionReceiptError,
 	} = useDistantWriteContract({
 		fn: "openContract",
@@ -84,12 +88,91 @@ export default function CompletionComponent({
 		write();
 	};
 
+	const getButtonContent = () => {
+		if (isPending || isConfirming) {
+			return (
+				<>
+					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					Processing...
+				</>
+			);
+		}
+		if (isTrxSubmitted && !isConfirmed) {
+			return (
+				<>
+					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					Confirming...
+				</>
+			);
+		}
+		if (isConfirmed) {
+			return (
+				<>
+					<CheckCircle className="mr-2 h-4 w-4" />
+					Loan Opened
+				</>
+			);
+		}
+		if (WriteContractError || WaitForTransactionReceiptError) {
+			return (
+				<>
+					<XCircle className="mr-2 h-4 w-4" />
+					Error, Retry!
+				</>
+			);
+		}
+		return "Open Loan";
+	};
 	const isButtonDisabled =
 		!selectedNFTs.length ||
 		!loanData.amount ||
 		!loanData.interest ||
 		isPending ||
 		isConfirming;
+
+	useEffect(() => {
+		if (isConfirmed) {
+			confetti({
+				particleCount: 100,
+				spread: 70,
+				origin: { y: 0.6 },
+			});
+		}
+	}, [isConfirmed]);
+
+	if (isConfirmed) {
+		return (
+			<Card className="w-full max-w-2xl mx-auto border-none">
+				<CardHeader>
+					<CardTitle className="text-xl font-bold">
+						Loan Request Successful
+					</CardTitle>
+					<CardDescription className="text-xs">
+						Your NFT-backed loan has been successfully opened
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="flex flex-col items-center space-y-4">
+					<CheckCircle className="w-16 h-16 text-green-500" />
+					<p className="text-center text-wrap">
+						Your loan request for {loanData.amount} ETH has been processed
+						successfully.
+					</p>
+					<p className="text-sm text-muted-foreground text-wrap">
+						Transaction Hash: {slice(hash as Address)}
+					</p>
+				</CardContent>
+				<CardFooter className="flex justify-center">
+					<Button
+						onClick={() => {
+							onBack();
+							reset();
+						}}>
+						Back to Dashboard
+					</Button>
+				</CardFooter>
+			</Card>
+		);
+	}
 
 	return (
 		<Card className="w-full max-w-2xl mx-auto border-none">
@@ -113,7 +196,6 @@ export default function CompletionComponent({
 						Youve selected {selectedNFTs.length} NFT
 						{selectedNFTs.length !== 1 ? "s" : ""} as collateral for this loan.
 					</p>
-					{/* You can add more details about selected NFTs here */}
 				</div>
 
 				<div className="space-y-4">
@@ -172,11 +254,12 @@ export default function CompletionComponent({
 					onClick={handleOpenLoan}
 					className="w-32"
 					disabled={isButtonDisabled}>
-					{isPending || isConfirming
+					{/* {isPending || isConfirming
 						? "Processing..."
 						: isTrxSubmitted
 						? "Confirming..."
-						: "Open Loan"}
+						: "Open Loan"} */}
+					{getButtonContent()}
 				</Button>
 			</CardFooter>
 		</Card>

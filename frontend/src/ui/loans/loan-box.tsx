@@ -17,6 +17,7 @@ import { TransactionDialog } from "../transaction-dialog/transaction";
 import { LendComponent } from "../transaction-dialog/lend-content";
 import { RepayLoanTransaction } from "../transaction-dialog/loan/repay-loan-transaction";
 import { ApprovalERC20 } from "../checkers/erc20-approval";
+import { CancelLoanRequest } from "../transaction-dialog/loan/cancel-loan-transaction";
 interface LoanData {
 	id: string;
 	amount: string;
@@ -63,16 +64,19 @@ export function LoanBox({ loan, onAction }: LoanBoxProps) {
 		if (status === LoanStatus.PENDING && isOwner) {
 			return (
 				<TransactionDialog
-					trigger={<Button className="w-full"> Cancel Loan Request</Button>}
+					trigger={
+						<Button className="w-full" variant="destructive">
+							{" "}
+							Cancel Loan Request
+						</Button>
+					}
 					title="Cancel Loan Request"
 					trxTitle="Cancelling Loan ...."
 					description="You are about to cancel a loan you just open which has not been funded yet">
-					<RepayLoanTransaction
-						lender={loan.lender?.id}
+					<CancelLoanRequest
 						loanId={loan.id}
 						amount={loan.amount}
-						proposedInterest={loan.interest.toString()}
-						expiry={loan.expiry}
+						proposedInterest={BigInt(loan.interest)}
 					/>
 				</TransactionDialog>
 			);
