@@ -7,6 +7,7 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 ## 🌟 Features
 
 ### For Borrowers
+
 - **NFT Collateralization**: Lock your ERC-721 NFTs as collateral to secure loans
 - **Flexible Loan Terms**: Choose loan duration (7-90 days) and set your preferred interest rates
 - **Multiple Payment Options**: Borrow in ETH or WETH
@@ -14,6 +15,7 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 - **Transparent Interest Calculation**: Dynamic interest calculation based on block-based accrual
 
 ### For Lenders
+
 - **Competitive Yields**: Earn attractive interest rates on your capital
 - **Bidding System**: Propose custom interest rates for loan requests
 - **Risk Management**: Collateralized loans with liquidation mechanisms
@@ -21,6 +23,7 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 - **Automated Liquidation**: Protection through time-based liquidation system
 
 ### Platform Features
+
 - **Multi-Collection Support**: Support for verified NFT collections
 - **Real-time Analytics**: Protocol statistics and performance metrics
 - **User Dashboard**: Comprehensive loan management interface
@@ -32,11 +35,13 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 ### Smart Contracts (Solidity)
 
 #### Core Contracts
+
 - **`P2PLending.sol`**: Main lending protocol handling loan creation, bidding, and repayment
 - **`TokenLocker.sol`**: Secure NFT custody and collateral management
 - **`Protocol.sol` (DistantFinance)**: Protocol governance, fee management, and collection verification
 
 #### Key Features
+
 - **ReentrancyGuard**: Protection against reentrancy attacks
 - **Pausable**: Emergency pause functionality for security
 - **Access Control**: Role-based permissions and admin functions
@@ -46,6 +51,7 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 ### Frontend (Next.js 14)
 
 #### Technology Stack
+
 - **Framework**: Next.js 14 with App Router
 - **Styling**: Tailwind CSS with custom components
 - **Web3 Integration**: Wagmi + Viem for blockchain interactions
@@ -55,6 +61,7 @@ Distant Finance is a decentralized peer-to-peer (P2P) NFT lending and borrowing 
 - **Animations**: Framer Motion for smooth transitions
 
 #### Key Pages
+
 - **Landing Page**: Protocol overview and statistics
 - **Dashboard**: User loan management and NFT portfolio
 - **Loans Marketplace**: Browse and interact with available loans
@@ -89,18 +96,21 @@ distant--finance/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm/yarn/pnpm
 - Git
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/IbrahimIjai/distant--finance.git
    cd distant--finance
    ```
 
 2. **Install Frontend Dependencies**
+
    ```bash
    cd frontend
    npm install
@@ -111,17 +121,19 @@ distant--finance/
    ```
 
 3. **Install Contract Dependencies**
+
    ```bash
    cd ../contracts
    npm install
    ```
 
 4. **Environment Setup**
+
    ```bash
    # Frontend (.env.local)
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
    NEXT_PUBLIC_GRAPHQL_ENDPOINT=your_subgraph_endpoint
-   
+
    # Contracts (.env)
    DEPLOYER_PRIVATE_KEY=your_private_key
    BASESCAN_API_KEY=your_basescan_api_key
@@ -130,13 +142,16 @@ distant--finance/
 ### Development
 
 1. **Start Frontend Development Server**
+
    ```bash
    cd frontend
    npm run dev
    ```
+
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 2. **Compile Smart Contracts**
+
    ```bash
    cd contracts
    npm run compile
@@ -156,12 +171,14 @@ distant--finance/
 ## 🛠️ Technical Specifications
 
 ### Smart Contract Features
+
 - **Solidity Version**: ^0.8.20
 - **OpenZeppelin Integration**: Security and standard implementations
 - **Gas Optimization**: Efficient contract design with optimized operations
 - **Upgradeable Architecture**: Proxy pattern for future improvements
 
 ### Frontend Technologies
+
 - **Next.js 14**: Modern React framework with server-side rendering
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling framework
@@ -170,6 +187,7 @@ distant--finance/
 - **Framer Motion**: Animation library
 
 ### Security Features
+
 - **Reentrancy Protection**: SafeGuards against common attacks
 - **Access Control**: Multi-level permission system
 - **Pausable Operations**: Emergency stop functionality
@@ -183,22 +201,26 @@ We welcome contributions from the community! Here's how you can help:
 ### Development Guidelines
 
 1. **Fork the Repository**
+
    ```bash
    git fork https://github.com/IbrahimIjai/distant--finance.git
    ```
 
 2. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **Code Standards**
+
    - Follow existing code style and conventions
    - Add comprehensive tests for new features
    - Update documentation as needed
    - Ensure all tests pass before submitting
 
 4. **Commit Guidelines**
+
    ```bash
    git commit -m "feat: add new lending feature"
    git commit -m "fix: resolve interest calculation bug"
@@ -213,18 +235,21 @@ We welcome contributions from the community! Here's how you can help:
 ### Areas for Contribution
 
 #### Smart Contracts
+
 - **Security Audits**: Help review and improve contract security
 - **Gas Optimization**: Optimize contract operations for lower gas costs
 - **Feature Development**: Add new lending/borrowing features
 - **Testing**: Expand test coverage and edge cases
 
 #### Frontend Development
+
 - **UI/UX Improvements**: Enhance user experience and interface design
 - **Mobile Optimization**: Improve mobile responsiveness
 - **Performance**: Optimize loading times and interactions
 - **Accessibility**: Improve platform accessibility features
 
 #### Documentation
+
 - **API Documentation**: Expand technical documentation
 - **User Guides**: Create comprehensive user tutorials
 - **Developer Docs**: Improve development setup guides
@@ -232,6 +257,7 @@ We welcome contributions from the community! Here's how you can help:
 ### Bug Reports & Feature Requests
 
 Please use GitHub Issues to report bugs or request features:
+
 - **Bug Report**: Describe the issue, steps to reproduce, and expected behavior
 - **Feature Request**: Explain the feature, use case, and potential implementation
 
