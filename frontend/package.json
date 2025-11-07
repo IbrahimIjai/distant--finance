@@ -46,6 +46,7 @@
 		"react-dom": "^19.2.0",
 		"react-fast-marquee": "^1.6.5",
 		"react-hook-form": "^7.53.0",
+		"tailwind": "^4.0.0",
 		"tailwind-merge": "^2.5.3",
 		"tailwindcss-animate": "^1.0.7",
 		"viem": "^2.21.19",
