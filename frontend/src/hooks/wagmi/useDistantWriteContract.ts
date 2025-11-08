@@ -1,7 +1,7 @@
 import { Abi, Address } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { ToasterToast, useToast } from "../use-toast";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export type TrxTitle =
 	| "Creating Approval for all Tokens in the selected collection"
@@ -37,38 +37,7 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 		update: (props: ToasterToast) => void;
 	} | null>(null);
 
-	const {
-		data: hash,
-		isPending,
-		isSuccess: isTrxSubmitted,
-		isError: isWriteContractError,
-		writeContract,
-		error: WriteContractError,
-		reset,
-	} = useWriteContract();
-	// console.log(
-	// 	"isWriteContractError isWriteContractError",
-	// 	isWriteContractError,
-	// );
-	const {
-		isLoading: isConfirming,
-		isSuccess: isConfirmed,
-		isError: isWaitTrxError,
-		error: WaitForTransactionReceiptError,
-	} = useWaitForTransactionReceipt({
-		hash,
-		confirmations: 2,
-	});
-
-	const write = () =>
-		writeContract({
-			address: contractAddress,
-			abi,
-			functionName: fn,
-			args,
-			value,
-		});
-
+	// Local toast helper available for callbacks below
 	const showToast = (
 		title: string,
 		description: string,
@@ -85,48 +54,64 @@ export const useDistantWriteContract = <TArgs extends readonly unknown[]>({
 		});
 	};
 
-	useEffect(() => {
-		if (isPending) {
+	const {
+		data: hash,
+		isPending,
+		isSuccess: isTrxSubmitted,
+		isError: isWriteContractError,
+		writeContract,
+		error: WriteContractError,
+		reset,
+	} = useWriteContract({
+		onMutate: () => {
 			showToast(
 				`${trxTitle}...`,
-				"Transaction Pending, Please confirm in wallet",
+				"Transaction pending, please confirm in wallet",
 			);
-		} else if (isTrxSubmitted) {
-			showToast(
-				`${trxTitle}...`,
-				"Transaction has been submitted to the network",
-			);
-		} else if (isConfirming) {
-			showToast(`${trxTitle}...`, "Waiting for transaction confirmation");
-		} else if (isConfirmed) {
-			showToast(`${trxTitle}`, "Transaction confirmed successfully", "default");
-		} else if (isWriteContractError || isWaitTrxError) {
+		},
+		onSuccess: () => {
+			showToast(`${trxTitle}...`, "Transaction submitted to the network");
+		},
+		onError: (error: Error) => {
 			showToast(
 				"Transaction Failed",
-				WriteContractError?.message ||
-					WaitForTransactionReceiptError?.message ||
-					"An error occurred",
+				error?.message || "An error occurred while submitting",
 				"destructive",
 			);
-		}
+		},
+	});
+	// console.log(
+	// 	"isWriteContractError isWriteContractError",
+	// 	isWriteContractError,
+	// );
+	const {
+		isLoading: isConfirming,
+		isSuccess: isConfirmed,
+		isError: isWaitTrxError,
+		error: WaitForTransactionReceiptError,
+	} = useWaitForTransactionReceipt({
+		hash,
+		confirmations: 2,
+		onSuccess: () => {
+			showToast(`${trxTitle}`, "Transaction confirmed successfully");
+		},
+		onError: (error: Error) => {
+			showToast(
+				"Transaction Failed",
+				error?.message || "An error occurred during confirmation",
+				"destructive",
+			);
+		},
+	});
 
-		// Clean up function to dismiss the toast after 3 seconds if no state change
-		const timer = setTimeout(() => {
-			if (toastRef.current) {
-				toastRef.current.dismiss();
-				toastRef.current = null;
-			}
-		}, 3000);
-
-		return () => clearTimeout(timer);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [
-		isPending,
-		isTrxSubmitted,
-		isConfirmed,
-		isWriteContractError,
-		isWaitTrxError,
-	]);
+	const write = () =>
+		writeContract({
+			address: contractAddress,
+			abi,
+			functionName: fn,
+			args,
+			value,
+		});
 
 	return {
 		write,
